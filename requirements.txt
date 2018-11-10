@@ -1,0 +1,8 @@
+bcrypt
+flask-collect
+flask-jwt-extended
+flask-restplus
+flask-security
+gunicorn
+marshmallow
+peewee-migrate
