@@ -16,7 +16,7 @@ def register(app):
     @migration.command()
     @click.argument('name')
     def create(name):
-        router.create(name, 'app.models')
+        router.create(name, 'pyser.models')
 
     @migration.command()
     def run():

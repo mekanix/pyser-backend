@@ -4,6 +4,7 @@ from marshmallow import Schema, fields, post_load
 
 from ..models.auth import Role, User, UserRoles
 from ..models.parsing import TokenModel
+from ..models.talk import Talk
 
 
 def marshmallowToField(field, required=None):
@@ -106,9 +107,16 @@ class UserSchema(BaseSchema):
         name = 'User'
 
 
-schemas = [
-    TokenSchema,
-    UserSchema,
-    UserRolesSchema,
-    RoleSchema,
-]
+class TalkSchema(BaseSchema):
+    id = fields.Integer(description='ID', dump_only=True)
+    description = fields.String(description='Short talk description')
+    text = fields.String(description='Long talk description')
+    title = fields.String(description='Talk title')
+    user = fields.Nested(UserSchema)
+
+    class Meta:
+        model = Talk
+        name = 'Talk'
+
+
+schemas = [TokenSchema, UserSchema, UserRolesSchema, RoleSchema, TalkSchema]

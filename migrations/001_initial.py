@@ -1,4 +1,3 @@
-# flake8: noqa
 """Peewee migrations -- 001_initial.py.
 
 Some examples (model - class or model name)::
@@ -24,11 +23,23 @@ Some examples (model - class or model name)::
 
 import peewee as pw
 
+try:
+    import playhouse.postgres_ext as pw_pext
+except ImportError:
+    pass
+
 SQL = pw.SQL
 
 
 def migrate(migrator, database, fake=False, **kwargs):
     """Write your migrations here."""
+
+    @migrator.create_model
+    class BaseModel(pw.Model):
+        id = pw.AutoField()
+
+        class Meta:
+            table_name = "basemodel"
 
     @migrator.create_model
     class Role(pw.Model):
@@ -50,6 +61,22 @@ def migrate(migrator, database, fake=False, **kwargs):
 
         class Meta:
             table_name = "user"
+
+    @migrator.create_model
+    class Talk(pw.Model):
+        id = pw.AutoField()
+        description = pw.TextField()
+        text = pw.TextField()
+        title = pw.TextField()
+        user = pw.ForeignKeyField(
+            backref='talks',
+            column_name='user_id',
+            field='id',
+            model=migrator.orm['user']
+        )
+
+        class Meta:
+            table_name = "talk"
 
     @migrator.create_model
     class UserRoles(pw.Model):
@@ -76,6 +103,10 @@ def rollback(migrator, database, fake=False, **kwargs):
 
     migrator.remove_model('userroles')
 
+    migrator.remove_model('talk')
+
     migrator.remove_model('user')
 
     migrator.remove_model('role')
+
+    migrator.remove_model('basemodel')

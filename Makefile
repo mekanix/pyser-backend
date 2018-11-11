@@ -1,4 +1,4 @@
-SERVICE = backend
+SERVICE = pyserback
 REGGAE_PATH :=/usr/local/share/reggae
 
 .if exists(provisioners.mk)
