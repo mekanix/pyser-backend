@@ -1,8 +1,9 @@
 from flask_restplus import fields as rest_fields
 from flask_restplus.model import Model
-from marshmallow import Schema, fields, post_load
+from marshmallow import Schema, fields, missing, post_load
 
 from ..models.auth import Role, User, UserRoles
+from ..models.date import datetime_format
 from ..models.parsing import TokenModel
 from ..models.talk import Talk
 
@@ -32,9 +33,15 @@ def marshmallowToField(field, required=None):
     else:
         field_required = required
     if subtype is None:
+        if field.default is missing:
+            return field_type(
+                description=description,
+                required=field_required,
+            )
         return field_type(
             description=description,
             required=field_required,
+            default=field.default,
         )
     return field_type(
         subtype,
@@ -110,6 +117,9 @@ class UserSchema(BaseSchema):
 class TalkSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     description = fields.String(description='Short talk description')
+    end = fields.DateTime(format=datetime_format)
+    published = fields.Boolean(default=False)
+    start = fields.DateTime(format=datetime_format)
     text = fields.String(description='Long talk description')
     title = fields.String(description='Talk title')
     user = fields.Nested(UserSchema)

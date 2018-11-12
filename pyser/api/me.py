@@ -1,9 +1,9 @@
-from flask_restplus import abort
 from flask_jwt_extended import get_jwt_identity
-from .resources import ProtectedResource
-from .namespaces import ns_me
-from .schemas import UserSchema
+
 from ..models.auth import User
+from .namespaces import ns_me
+from .resources import ProtectedResource
+from .schemas import UserSchema
 
 
 @ns_me.route('', endpoint='me')
@@ -15,9 +15,9 @@ class MeAPI(ProtectedResource):
         try:
             user = User.get(email=email)
         except User.DoesNotExist:
-            abort(404, 'User not found')
+            return {'message': 'User not found'}, 404
         schema = UserSchema()
         response, errors = schema.dump(user)
         if errors:
-            abort(409, errors)
+            return errors, 409
         return response
