@@ -4,6 +4,7 @@ from marshmallow import Schema, fields, missing, post_load
 
 from ..models.auth import Role, User, UserRoles
 from ..models.date import datetime_format
+from ..models.gallery import GalleryFile
 from ..models.parsing import TokenModel
 from ..models.talk import Talk
 
@@ -129,4 +130,31 @@ class TalkSchema(BaseSchema):
         name = 'Talk'
 
 
-schemas = [TokenSchema, UserSchema, UserRolesSchema, RoleSchema, TalkSchema]
+class GalleryFileSchema(BaseSchema):
+    id = fields.Integer(description='ID', dump_only=True)
+    url = fields.String(description='File URL')
+
+    class Meta:
+        model = GalleryFile
+        name = 'GalleryFile'
+
+
+class GalleryAlbumSchema(BaseSchema):
+    id = fields.Integer(description='ID', dump_only=True)
+    name = fields.String(description='Album name')
+    files = fields.List(fields.Nested(GalleryFileSchema), many=True)
+
+    class Meta:
+        model = GalleryFile
+        name = 'GalleryFile'
+
+
+schemas = [
+    GalleryAlbumSchema,
+    GalleryFileSchema,
+    RoleSchema,
+    TalkSchema,
+    TokenSchema,
+    UserRolesSchema,
+    UserSchema,
+]
