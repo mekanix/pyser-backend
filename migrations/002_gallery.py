@@ -24,11 +24,6 @@ Some examples (model - class or model name)::
 
 import peewee as pw
 
-try:
-    pass
-except ImportError:
-    pass
-
 SQL = pw.SQL
 
 
@@ -38,7 +33,7 @@ def migrate(migrator, database, fake=False, **kwargs):
     @migrator.create_model
     class MainEvent(pw.Model):
         id = pw.AutoField()
-        year = pw.IntegerField()
+        year = pw.IntegerField(unique=True)
 
         class Meta:
             table_name = "mainevent"
@@ -47,7 +42,7 @@ def migrate(migrator, database, fake=False, **kwargs):
     class GalleryAlbum(pw.Model):
         id = pw.AutoField()
         mainEvent = pw.ForeignKeyField(
-            backref='galleries',
+            backref='albums',
             column_name='mainEvent_id',
             field='id',
             model=migrator.orm['mainevent'],
@@ -62,7 +57,7 @@ def migrate(migrator, database, fake=False, **kwargs):
     class GalleryFile(pw.Model):
         id = pw.AutoField()
         album = pw.ForeignKeyField(
-            backref='galleryFiles',
+            backref='files',
             column_name='album_id',
             field='id',
             model=migrator.orm['galleryalbum']

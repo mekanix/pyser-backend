@@ -13,6 +13,8 @@ build
 cbsd.conf
 coverage.xml
 database.db
+media/*
+!media/.keep
 site.retry
 test.db
 vars.mk

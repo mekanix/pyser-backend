@@ -16,6 +16,8 @@ class Config:
     JWT_COOKIE_SECURE = True
     #  JWT_ACCESS_TOKEN_EXPIRES = timedelta(seconds=1)
     #  JWT_REFRESH_TOKEN_EXPIRES = timedelta(seconds=10)
+    MEDIA_URL = '/media'
+    MEDIA_PATH = '../media'
     DATABASE = {
         'name': 'database.db',
         'engine': 'SqliteDatabase',

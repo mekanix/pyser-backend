@@ -1,9 +1,9 @@
 from flask import current_app
-from flask_restplus import abort
-from .resources import ProtectedResource
-from .namespaces import ns_user
-from .schemas import UserSchema
+
 from ..models.auth import User
+from .namespaces import ns_user
+from .resources import ProtectedResource
+from .schemas import UserSchema
 
 
 @ns_user.route('', endpoint='users')
@@ -13,7 +13,7 @@ class UserListAPI(ProtectedResource):
         schema = UserSchema(many=True)
         response, errors = schema.dump(User.select())
         if errors:
-            abort(409, errors)
+            return errors, 409
         return response
 
     @ns_user.expect(UserSchema.fields())
@@ -21,7 +21,7 @@ class UserListAPI(ProtectedResource):
         schema = UserSchema()
         user, errors = schema.load(current_app.api.payload)
         if errors:
-            abort(409, errors)
+            return errors, 409
         user.save()
         return schema.dump(user)
 
@@ -34,9 +34,9 @@ class UserAPI(ProtectedResource):
         try:
             user = User.get(id=id)
         except User.DoesNotExist:
-            abort(404, 'User not found')
+            return {'message': 'User not found'}, 404
         schema = UserSchema()
         response, errors = schema.dump(user)
         if errors:
-            abort(409, errors)
+            return errors, 409
         return response

@@ -6,4 +6,4 @@ Model = db.Model
 
 
 class MainEvent(Model):
-    year = IntegerField()
+    year = IntegerField(index=True, unique=True)
