@@ -1,6 +1,7 @@
 from flask_restplus import fields as rest_fields
 from flask_restplus.model import Model
-from marshmallow import Schema, fields, missing, post_load
+from marshmallow import Schema, fields, missing, post_load, pre_load
+from marshmallow.exceptions import ValidationError
 
 from ..models.auth import Role, User, UserRoles
 from ..models.date import datetime_format
@@ -53,6 +54,12 @@ def marshmallowToField(field, required=None):
 
 
 class BaseSchema(Schema):
+    @pre_load
+    def check_payload(self, data):
+        if data is None:
+            raise ValidationError('Invalid input', field_names='message')
+        return data
+
     @post_load
     def make_object(self, data):
         return self.Meta.model(**data)

@@ -1,12 +1,22 @@
-from flask import current_app
+from flask import current_app, request
 from flask_jwt_extended import jwt_required
-from flask_restplus import Resource
+from flask_restplus import Resource, reqparse
 
 from ..models.event import MainEvent
 from ..models.gallery import GalleryAlbum
 from .namespaces import ns_gallery
 from .pagination import paginate, parser
 from .schemas import GalleryAlbumSchema, GalleryFileSchema
+
+gallery_parser = reqparse.RequestParser()
+gallery_parser.add_argument('resumableChunkNumber', type=int)
+gallery_parser.add_argument('resumableChunkSize', type=int)
+gallery_parser.add_argument('resumableCurrentChunkSize', type=int)
+gallery_parser.add_argument('resumableTotalSize', type=int)
+gallery_parser.add_argument('resumableType')
+gallery_parser.add_argument('resumableIdentifier')
+gallery_parser.add_argument('resumableType')
+gallery_parser.add_argument('resumableRelativePath')
 
 
 @ns_gallery.route('', endpoint='albums')
@@ -33,7 +43,7 @@ class GalleryAlbumListAPI(Resource):
     def post(self, year=None):
         """Create new album"""
         schema = GalleryAlbumSchema()
-        album, errors = schema.load(current_app.api.payload)
+        album, errors = schema.load(request.get_json())
         if errors:
             return errors, 409
         album.mainEvent = None
@@ -85,7 +95,7 @@ class GalleryAlbumAPI(Resource):
         return response
 
     @jwt_required
-    @ns_gallery.expect(GalleryFileSchema.fields())
+    @ns_gallery.expect(gallery_parser)
     def post(self, name, year=None):
         """Upload new file"""
         if year is not None:
@@ -96,14 +106,9 @@ class GalleryAlbumAPI(Resource):
         else:
             mainEvent = None
         try:
-            album = GalleryAlbum.get(name=name, mainEvent=mainEvent)
+            GalleryAlbum.get(name=name, mainEvent=mainEvent)
         except GalleryAlbum.DoesNotExist:
             return {'message': 'No such album'}, 404
-        schema = GalleryFileSchema()
-        file, error = schema.load(current_app.api.payload)
-        file.album = album
-        file.save()
-        response, errors = schema.dump(file)
-        if errors:
-            return errors, 409
-        return response
+        args = gallery_parser.parse_args()
+        print(args)
+        return {'message': 'OK'}
