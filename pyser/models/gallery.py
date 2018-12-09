@@ -15,6 +15,8 @@ class GalleryFile(Model):
     album = ForeignKeyField(GalleryAlbum, related_name='files')
     filename = TextField(index=True)
 
-    @property
-    def url(self):
-        return f'/media/{self.mainEvent.year}/${self.filename}'
+    def url(self, prefix=''):
+        return f'{prefix}/{self.album.mainEvent.year}/{self.album.name}/{self.filename}'
+
+    def path(self, prefix):
+        return f'{prefix}/{self.album.mainEvent.year}/{self.album.name}/{self.filename}'

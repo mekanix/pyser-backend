@@ -1,22 +1,30 @@
+import os
+
 from flask import current_app, request
 from flask_jwt_extended import jwt_required
 from flask_restplus import Resource, reqparse
+from werkzeug.datastructures import FileStorage
 
 from ..models.event import MainEvent
-from ..models.gallery import GalleryAlbum
+from ..models.gallery import GalleryAlbum, GalleryFile
 from .namespaces import ns_gallery
 from .pagination import paginate, parser
 from .schemas import GalleryAlbumSchema, GalleryFileSchema
 
 gallery_parser = reqparse.RequestParser()
-gallery_parser.add_argument('resumableChunkNumber', type=int)
-gallery_parser.add_argument('resumableChunkSize', type=int)
-gallery_parser.add_argument('resumableCurrentChunkSize', type=int)
-gallery_parser.add_argument('resumableTotalSize', type=int)
-gallery_parser.add_argument('resumableType')
-gallery_parser.add_argument('resumableIdentifier')
-gallery_parser.add_argument('resumableType')
-gallery_parser.add_argument('resumableRelativePath')
+gallery_parser.add_argument('resumableChunkNumber', type=int, location='form')
+gallery_parser.add_argument('resumableChunkSize', type=int, location='form')
+gallery_parser.add_argument(
+    'resumableCurrentChunkSize',
+    type=int,
+    location='form'
+)
+gallery_parser.add_argument('resumableTotalSize', type=int, location='form')
+gallery_parser.add_argument('resumableType', location='form')
+gallery_parser.add_argument('resumableIdentifier', location='form')
+gallery_parser.add_argument('resumableType', location='form')
+gallery_parser.add_argument('resumableRelativePath', location='form')
+gallery_parser.add_argument('file', type=FileStorage, location='files')
 
 
 @ns_gallery.route('', endpoint='albums')
@@ -106,9 +114,23 @@ class GalleryAlbumAPI(Resource):
         else:
             mainEvent = None
         try:
-            GalleryAlbum.get(name=name, mainEvent=mainEvent)
+            album = GalleryAlbum.get(name=name, mainEvent=mainEvent)
         except GalleryAlbum.DoesNotExist:
             return {'message': 'No such album'}, 404
         args = gallery_parser.parse_args()
-        print(args)
+        file = args.get('file', None)
+        chunkNumber = args.get('resumableChunkNumber')
+        if chunkNumber == 1:
+            galleryFile = GalleryFile()
+            galleryFile.album = album
+            galleryFile.filename = file.filename
+            galleryFile.save()
+        media_path = os.path.abspath(
+            current_app.config.get(
+                'MEDIA_PATH',
+                None,
+            )
+        )
+        with open(galleryFile.path(media_path), 'wb+') as f:
+            f.write(file.stream.read())
         return {'message': 'OK'}
