@@ -121,10 +121,12 @@ class GalleryAlbumAPI(Resource):
         file = args.get('file', None)
         chunkNumber = args.get('resumableChunkNumber')
         if chunkNumber == 1:
-            galleryFile = GalleryFile()
-            galleryFile.album = album
-            galleryFile.filename = file.filename
-            galleryFile.save()
+            galleryFile, created = GalleryFile.get_or_create(
+                album=album,
+                filename=file.filename,
+            )
+            if created:
+                galleryFile.save()
         media_path = os.path.abspath(
             current_app.config.get(
                 'MEDIA_PATH',
