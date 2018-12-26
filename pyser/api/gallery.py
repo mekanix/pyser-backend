@@ -9,6 +9,7 @@ from ..models.event import MainEvent
 from ..models.gallery import GalleryAlbum, GalleryFile
 from .namespaces import ns_gallery
 from .pagination import paginate, parser
+from .resources import ProtectedResource
 from .schemas import GalleryAlbumSchema, GalleryFileSchema
 
 gallery_parser = reqparse.RequestParser()
@@ -102,7 +103,13 @@ class GalleryAlbumAPI(Resource):
         response['prefix'] = prefix
         return response
 
-    @jwt_required
+
+@ns_gallery.route('/upload/<name>', endpoint='upload')
+@ns_gallery.route('/upload/<name>/<int:year>', endpoint='year_upload')
+class GalleryUploadAPI(ProtectedResource):
+    def get(self, name, year=None):
+        pass
+
     @ns_gallery.expect(gallery_parser)
     def post(self, name, year=None):
         """Upload new file"""
