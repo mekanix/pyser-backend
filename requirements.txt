@@ -7,3 +7,4 @@ gunicorn
 marshmallow
 peewee-migrate
 psycopg2
+unidecode

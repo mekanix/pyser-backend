@@ -1,9 +1,10 @@
 from flask_restplus import fields as rest_fields
 from flask_restplus.model import Model
-from marshmallow import Schema, fields, missing, post_load, pre_load
+from marshmallow import Schema, fields, missing, post_load, pre_dump, pre_load
 from marshmallow.exceptions import ValidationError
 
 from ..models.auth import Role, User, UserRoles
+from ..models.blog import Blog
 from ..models.date import datetime_format
 from ..models.event import MainEvent
 from ..models.gallery import GalleryAlbum, GalleryFile
@@ -136,6 +137,33 @@ class TalkSchema(BaseSchema):
     class Meta:
         model = Talk
         name = 'Talk'
+class BlogSchema(BaseSchema):
+    id = fields.Integer(description='ID', dump_only=True)
+    author = fields.Nested(UserSchema, dump_only=True)
+    content = fields.Str(description='Content')
+    date = fields.DateTime(
+        description='Time when blog was created',
+        format=datetime_format,
+        dump_only=True,
+    )
+    published = fields.Boolean(description='Published', default=False)
+    slug = fields.Str(description='Slug', dump_only=True)
+    title = fields.Str(description='Title')
+
+    @pre_dump
+    def convert_date(self, data):
+        if (type(data.date) == str):
+            newdata = copy(data)
+            newdata.date = datetime.datetime.strptime(
+                data.date,
+                peewee_datetime_format
+            )
+            return newdata
+        return data
+
+    class Meta:
+        model = Blog
+        name = 'Blog'
 
 
 class MainEventSchema(BaseSchema):
@@ -168,6 +196,7 @@ class GalleryAlbumSchema(BaseSchema):
 
 
 schemas = [
+    BlogSchema,
     GalleryAlbumSchema,
     GalleryFileSchema,
     MainEventSchema,

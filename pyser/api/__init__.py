@@ -52,6 +52,7 @@ def create_api(app):
     app.register_blueprint(apidoc.apidoc)
     from . import (  # noqa: F401
         auth,
+        blog,
         gallery,
         main,
         me,
