@@ -1,12 +1,12 @@
 from flask_restplus import fields as rest_fields
 from flask_restplus.model import Model
-from marshmallow import Schema, fields, missing, post_load
+from marshmallow import Schema, fields, missing, post_load, pre_dump
 
 from ..models.auth import Role, User, UserRoles
 from ..models.date import datetime_format
 from ..models.parsing import TokenModel
 from ..models.talk import Talk
-
+from ..models.blog import Blog
 
 def marshmallowToField(field, required=None):
     typeOfField = type(field)
@@ -127,6 +127,39 @@ class TalkSchema(BaseSchema):
     class Meta:
         model = Talk
         name = 'Talk'
+class BlogSchema(BaseSchema):
+    id = fields.Integer(description='ID', dump_only=True)
+    author = fields.Nested(UserSchema, dump_only=True)
+    content = fields.Str(description='Content')
+    date = fields.DateTime(
+        description='Time when blog was created',
+        format=datetime_format,
+        dump_only=True,
+    )
+    published = fields.Boolean(description='Published', default=False)
+    slug = fields.Str(description='Slug', dump_only=True)
+    title = fields.Str(description='Title')
+
+    @pre_dump
+    def convert_date(self, data):
+        if (type(data.date) == str):
+            newdata = copy(data)
+            newdata.date = datetime.datetime.strptime(
+                data.date,
+                peewee_datetime_format
+            )
+            return newdata
+        return data
+
+    class Meta:
+        model = Blog
+        name = 'Blog'
 
 
-schemas = [TokenSchema, UserSchema, UserRolesSchema, RoleSchema, TalkSchema]
+schemas = [
+           BlogSchema,
+           TokenSchema,
+           UserSchema,
+           UserRolesSchema,
+           RoleSchema,
+           TalkSchema]
