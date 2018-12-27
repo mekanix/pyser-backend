@@ -1,11 +1,14 @@
+import datetime
+from copy import copy
+
 from flask_restplus import fields as rest_fields
 from flask_restplus.model import Model
 from marshmallow import Schema, fields, missing, post_load, pre_dump, pre_load
 from marshmallow.exceptions import ValidationError
 
+from ..date import datetime_format, peewee_datetime_format
 from ..models.auth import Role, User, UserRoles
 from ..models.blog import Blog
-from ..models.date import datetime_format
 from ..models.event import MainEvent
 from ..models.gallery import GalleryAlbum, GalleryFile
 from ..models.parsing import TokenModel
@@ -137,6 +140,8 @@ class TalkSchema(BaseSchema):
     class Meta:
         model = Talk
         name = 'Talk'
+
+
 class BlogSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     author = fields.Nested(UserSchema, dump_only=True)
@@ -152,6 +157,9 @@ class BlogSchema(BaseSchema):
 
     @pre_dump
     def convert_date(self, data):
+        date = getattr(data, 'date', None)
+        if date is None:
+            return data
         if (type(data.date) == str):
             newdata = copy(data)
             newdata.date = datetime.datetime.strptime(

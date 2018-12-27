@@ -10,7 +10,7 @@ cli.register(app)
 
 
 @app.route('/media/<path:path>')
-def send_js(path):
+def send_media(path):
     fullPath = f"../{app.config['MEDIA_PATH']}/{path}"
     return send_file(fullPath)
 
