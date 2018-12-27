@@ -1,4 +1,5 @@
 import click
+
 from flask.cli import AppGroup
 from peewee_migrate import Router
 
