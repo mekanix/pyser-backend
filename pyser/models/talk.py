@@ -1,8 +1,8 @@
 from peewee import BooleanField, DateTimeField, ForeignKeyField, TextField
 
+from ..date import datetime_format
 from ..db import db
 from .auth import User
-from .date import datetime_format
 
 Model = db.Model
 

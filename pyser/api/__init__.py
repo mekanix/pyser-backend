@@ -50,4 +50,12 @@ def create_api(app):
             app.api.add_namespace(ns)
     app.register_blueprint(api_v0)
     app.register_blueprint(apidoc.apidoc)
-    from . import auth, blog, me, talk, user  # noqa: F401
+    from . import (  # noqa: F401
+        auth,
+        blog,
+        gallery,
+        main,
+        me,
+        talk,
+        user,
+    )

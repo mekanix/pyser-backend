@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import current_app
 from flask_jwt_extended import get_jwt_identity, jwt_optional, jwt_required
 from flask_restplus import Resource
@@ -16,7 +18,6 @@ class BlogListAPI(Resource):
     def get(self):
         """List blog"""
         email = get_jwt_identity()
-        print(email)
         if email is None:
             query = Blog.select().where(Blog.published == True)  # noqa: E712
         else:
@@ -35,6 +36,7 @@ class BlogListAPI(Resource):
             user = User.get(email=email)
         except User.DoesNotExist:
             return {'message': 'User not found'}, 404
+        blog.date = datetime.utcnow()
         blog.author = user
         blog.save()
         return schema.dump(blog)
@@ -44,7 +46,7 @@ class BlogListAPI(Resource):
 @ns_blog.response(404, 'Blog not found')
 class BlogAPI(Resource):
     def get(self, year, month, day, slug):
-        """Get user details"""
+        """Get blog details"""
         try:
             blog = Blog.find(year, month, day, slug)
         except Blog.DoesNotExist:

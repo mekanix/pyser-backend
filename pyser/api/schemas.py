@@ -1,12 +1,19 @@
+import datetime
+from copy import copy
+
 from flask_restplus import fields as rest_fields
 from flask_restplus.model import Model
-from marshmallow import Schema, fields, missing, post_load, pre_dump
+from marshmallow import Schema, fields, missing, post_load, pre_dump, pre_load
+from marshmallow.exceptions import ValidationError
 
+from ..date import datetime_format, peewee_datetime_format
 from ..models.auth import Role, User, UserRoles
-from ..models.date import datetime_format
+from ..models.blog import Blog
+from ..models.event import MainEvent
+from ..models.gallery import GalleryAlbum, GalleryFile
 from ..models.parsing import TokenModel
 from ..models.talk import Talk
-from ..models.blog import Blog
+
 
 def marshmallowToField(field, required=None):
     typeOfField = type(field)
@@ -51,6 +58,12 @@ def marshmallowToField(field, required=None):
 
 
 class BaseSchema(Schema):
+    @pre_load
+    def check_payload(self, data):
+        if data is None:
+            raise ValidationError('Invalid input', field_names='message')
+        return data
+
     @post_load
     def make_object(self, data):
         return self.Meta.model(**data)
@@ -127,6 +140,8 @@ class TalkSchema(BaseSchema):
     class Meta:
         model = Talk
         name = 'Talk'
+
+
 class BlogSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     author = fields.Nested(UserSchema, dump_only=True)
@@ -142,6 +157,9 @@ class BlogSchema(BaseSchema):
 
     @pre_dump
     def convert_date(self, data):
+        date = getattr(data, 'date', None)
+        if date is None:
+            return data
         if (type(data.date) == str):
             newdata = copy(data)
             newdata.date = datetime.datetime.strptime(
@@ -156,10 +174,43 @@ class BlogSchema(BaseSchema):
         name = 'Blog'
 
 
+class MainEventSchema(BaseSchema):
+    id = fields.Integer(description='ID', dump_only=True)
+    year = fields.Integer(description='Year')
+
+    class Meta:
+        model = MainEvent
+        name = 'MainEvent'
+
+
+class GalleryFileSchema(BaseSchema):
+    id = fields.Integer(description='ID', dump_only=True)
+    filename = fields.String(description='Filename')
+
+    class Meta:
+        model = GalleryFile
+        name = 'GalleryFile'
+
+
+class GalleryAlbumSchema(BaseSchema):
+    id = fields.Integer(description='ID', dump_only=True)
+    name = fields.String(description='Album name')
+    files = fields.List(fields.Nested(GalleryFileSchema), many=True)
+    mainEvent = fields.Nested(MainEventSchema)
+
+    class Meta:
+        model = GalleryAlbum
+        name = 'GalleryAlbum'
+
+
 schemas = [
-           BlogSchema,
-           TokenSchema,
-           UserSchema,
-           UserRolesSchema,
-           RoleSchema,
-           TalkSchema]
+    BlogSchema,
+    GalleryAlbumSchema,
+    GalleryFileSchema,
+    MainEventSchema,
+    RoleSchema,
+    TalkSchema,
+    TokenSchema,
+    UserRolesSchema,
+    UserSchema,
+]

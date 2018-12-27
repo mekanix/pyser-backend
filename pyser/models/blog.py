@@ -52,4 +52,4 @@ class Blog(Model):
             raise cls.DoesNotExist
         if query.count() > 1:
             raise ValueError('Too many instances')
-            return query[0]
+        return query[0]
