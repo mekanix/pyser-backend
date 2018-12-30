@@ -1,9 +1,10 @@
-from peewee import IntegerField
+from peewee import BooleanField, IntegerField
 
 from ..db import db
 
 Model = db.Model
 
 
-class MainEvent(Model):
+class Event(Model):
     year = IntegerField(index=True, unique=True)
+    published = BooleanField(default=False)

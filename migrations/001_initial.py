@@ -38,6 +38,74 @@ def migrate(migrator, database, fake=False, **kwargs):
             table_name = "basemodel"
 
     @migrator.create_model
+    class User(pw.Model):
+        id = pw.AutoField()
+        active = pw.BooleanField(default=True)
+        admin = pw.BooleanField(default=True)
+        confirmed_at = pw.DateTimeField(null=True)
+        email = pw.TextField()
+        password = pw.TextField()
+
+        class Meta:
+            table_name = "users"
+
+    @migrator.create_model
+    class Blog(pw.Model):
+        id = pw.AutoField()
+        author = pw.ForeignKeyField(
+            backref='blogs',
+            column_name='author_id',
+            field='id',
+            model=migrator.orm['users']
+        )
+        content = pw.TextField()
+        date = pw.DateTimeField()
+        published = pw.BooleanField()
+        slug = pw.TextField()
+        title = pw.TextField()
+
+        class Meta:
+            table_name = "blog"
+
+    @migrator.create_model
+    class Event(pw.Model):
+        id = pw.AutoField()
+        year = pw.IntegerField(unique=True)
+        published = pw.BooleanField(default=False)
+
+        class Meta:
+            table_name = "event"
+
+    @migrator.create_model
+    class GalleryAlbum(pw.Model):
+        id = pw.AutoField()
+        event = pw.ForeignKeyField(
+            backref='albums',
+            column_name='event_id',
+            field='id',
+            model=migrator.orm['event'],
+            null=True
+        )
+        name = pw.TextField(index=True)
+
+        class Meta:
+            table_name = "galleryalbum"
+
+    @migrator.create_model
+    class GalleryFile(pw.Model):
+        id = pw.AutoField()
+        album = pw.ForeignKeyField(
+            backref='files',
+            column_name='album_id',
+            field='id',
+            model=migrator.orm['galleryalbum']
+        )
+        filename = pw.TextField(index=True)
+
+        class Meta:
+            table_name = "galleryfile"
+
+    @migrator.create_model
     class Role(pw.Model):
         id = pw.AutoField()
         description = pw.TextField(null=True)
@@ -47,23 +115,11 @@ def migrate(migrator, database, fake=False, **kwargs):
             table_name = "role"
 
     @migrator.create_model
-    class User(pw.Model):
-        id = pw.AutoField()
-        active = pw.BooleanField(constraints=[SQL("DEFAULT True")])
-        admin = pw.BooleanField(constraints=[SQL("DEFAULT False")])
-        confirmed_at = pw.DateTimeField(null=True)
-        email = pw.TextField()
-        password = pw.TextField()
-
-        class Meta:
-            table_name = "users"
-
-    @migrator.create_model
     class Talk(pw.Model):
         id = pw.AutoField()
         description = pw.TextField()
         end = pw.DateTimeField(null=True)
-        published = pw.BooleanField(constraints=[SQL("DEFAULT False")])
+        published = pw.BooleanField(default=False)
         start = pw.DateTimeField(null=True)
         text = pw.TextField()
         title = pw.TextField()
@@ -104,8 +160,16 @@ def rollback(migrator, database, fake=False, **kwargs):
 
     migrator.remove_model('talk')
 
-    migrator.remove_model('users')
-
     migrator.remove_model('role')
+
+    migrator.remove_model('galleryfile')
+
+    migrator.remove_model('galleryalbum')
+
+    migrator.remove_model('event')
+
+    migrator.remove_model('blog')
+
+    migrator.remove_model('users')
 
     migrator.remove_model('basemodel')

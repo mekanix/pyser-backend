@@ -9,7 +9,7 @@ from marshmallow.exceptions import ValidationError
 from ..date import datetime_format, peewee_datetime_format
 from ..models.auth import Role, User, UserRoles
 from ..models.blog import Blog
-from ..models.event import MainEvent
+from ..models.event import Event
 from ..models.gallery import GalleryAlbum, GalleryFile
 from ..models.parsing import TokenModel
 from ..models.talk import Talk
@@ -174,13 +174,13 @@ class BlogSchema(BaseSchema):
         name = 'Blog'
 
 
-class MainEventSchema(BaseSchema):
+class EventSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     year = fields.Integer(description='Year')
 
     class Meta:
-        model = MainEvent
-        name = 'MainEvent'
+        model = Event
+        name = 'Event'
 
 
 class GalleryFileSchema(BaseSchema):
@@ -196,7 +196,7 @@ class GalleryAlbumSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     name = fields.String(description='Album name')
     files = fields.List(fields.Nested(GalleryFileSchema), many=True)
-    mainEvent = fields.Nested(MainEventSchema)
+    event = fields.Nested(EventSchema)
 
     class Meta:
         model = GalleryAlbum
@@ -207,7 +207,7 @@ schemas = [
     BlogSchema,
     GalleryAlbumSchema,
     GalleryFileSchema,
-    MainEventSchema,
+    EventSchema,
     RoleSchema,
     TalkSchema,
     TokenSchema,
