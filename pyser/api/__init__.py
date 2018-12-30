@@ -53,8 +53,8 @@ def create_api(app):
     from . import (  # noqa: F401
         auth,
         blog,
+        event,
         gallery,
-        main,
         me,
         talk,
         user,

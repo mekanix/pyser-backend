@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required
 from flask_restplus import Resource, reqparse
 from werkzeug.datastructures import FileStorage
 
-from ..models.event import MainEvent
+from ..models.event import Event
 from ..models.gallery import GalleryAlbum, GalleryFile
 from .namespaces import ns_gallery
 from .pagination import paginate, parser
@@ -37,15 +37,15 @@ class GalleryAlbumListAPI(Resource):
         if year is None:
             return paginate(
                 GalleryAlbum.select().where(
-                    GalleryAlbum.mainEvent == None  # noqa: E711
+                    GalleryAlbum.event == None  # noqa: E711
                 ),
                 GalleryAlbumSchema(),
             )
         try:
-            mainEvent = MainEvent.get(year=year)
-        except MainEvent.DoesNotExist:
+            event = Event.get(year=year)
+        except Event.DoesNotExist:
             return {'message': 'No such event'}, 404
-        return paginate(mainEvent.albums, GalleryAlbumSchema())
+        return paginate(event.albums, GalleryAlbumSchema())
 
     @jwt_required
     @ns_gallery.expect(GalleryAlbumSchema.fields())
@@ -55,14 +55,14 @@ class GalleryAlbumListAPI(Resource):
         album, errors = schema.load(request.get_json())
         if errors:
             return errors, 409
-        album.mainEvent = None
+        album.event = None
         if year is not None:
             try:
-                album.mainEvent = MainEvent.get(year=year)
-            except MainEvent.DoesNotExist:
+                album.event = Event.get(year=year)
+            except Event.DoesNotExist:
                 return {'message': 'No such event'}, 404
         try:
-            GalleryAlbum.get(name=album.name, mainEvent=album.mainEvent)
+            GalleryAlbum.get(name=album.name, event=album.event)
             return {'message': 'Album already exists'}, 409
         except GalleryAlbum.DoesNotExist:
             album.save()
@@ -80,13 +80,13 @@ class GalleryAlbumAPI(Resource):
         """Get album details"""
         if year is not None:
             try:
-                mainEvent = MainEvent.get(year=year)
-            except MainEvent.DoesNotExist:
+                event = Event.get(year=year)
+            except Event.DoesNotExist:
                 return {'message': 'No such event'}, 404
         else:
-            mainEvent = None
+            event = None
         try:
-            album = GalleryAlbum.get(name=name, mainEvent=mainEvent)
+            album = GalleryAlbum.get(name=name, event=event)
         except GalleryAlbum.DoesNotExist:
             return {'message': 'No such album'}, 404
         schema = GalleryAlbumSchema()
@@ -115,13 +115,13 @@ class GalleryUploadAPI(ProtectedResource):
         """Upload new file"""
         if year is not None:
             try:
-                mainEvent = MainEvent.get(year=year)
-            except MainEvent.DoesNotExist:
+                event = Event.get(year=year)
+            except Event.DoesNotExist:
                 return {'message': 'No such event'}, 404
         else:
-            mainEvent = None
+            event = None
         try:
-            album = GalleryAlbum.get(name=name, mainEvent=mainEvent)
+            album = GalleryAlbum.get(name=name, event=event)
         except GalleryAlbum.DoesNotExist:
             return {'message': 'No such album'}, 404
         args = gallery_parser.parse_args()
