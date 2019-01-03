@@ -14,7 +14,7 @@ class Config:
     JWT_REFRESH_COOKIE_PATH = '/api/v0/auth/refresh'
     JWT_SESSION_COOKIE = False
     JWT_COOKIE_SECURE = True
-    #  JWT_ACCESS_TOKEN_EXPIRES = timedelta(seconds=1)
+    #  JWT_ACCESS_TOKEN_EXPIRES = timedelta(seconds=3)
     #  JWT_REFRESH_TOKEN_EXPIRES = timedelta(seconds=10)
     MEDIA_URL = '/media'
     MEDIA_PATH = 'media'

@@ -31,14 +31,23 @@ class BlogListAPI(Resource):
         blog, errors = schema.load(current_app.api.payload)
         if errors:
             return errors, 409
+        blog.date = datetime.utcnow()
         email = get_jwt_identity()
         try:
             user = User.get(email=email)
         except User.DoesNotExist:
             return {'message': 'User not found'}, 404
-        blog.date = datetime.utcnow()
-        blog.author = user
-        blog.save()
+        try:
+            Blog.find(
+                blog.date.year,
+                blog.date.month,
+                blog.date.day,
+                blog.slug,
+            )
+            return {'message': 'Post with the same title already exists'}, 409
+        except Blog.DoesNotExist:
+            blog.author = user
+            blog.save()
         return schema.dump(blog)
 
 
