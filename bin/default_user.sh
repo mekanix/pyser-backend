@@ -7,3 +7,4 @@ setup
 
 
 flask users create -a --password Sekrit admin@example.com
+flask events create `date '+%Y'`
