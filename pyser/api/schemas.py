@@ -137,6 +137,25 @@ class TalkSchema(BaseSchema):
     title = fields.String(description='Talk title')
     user = fields.Nested(UserSchema)
 
+    @pre_dump
+    def convert_date(self, data):
+        start = getattr(data, 'start', None)
+        end = getattr(data, 'end', None)
+        if None in [start, end]:
+            return data
+        newdata = copy(data)
+        if (type(data.start) == str):
+            newdata.start = datetime.datetime.strptime(
+                data.start,
+                peewee_datetime_format
+            )
+        if (type(data.end) == str):
+            newdata.end = datetime.datetime.strptime(
+                data.end,
+                peewee_datetime_format
+            )
+        return newdata
+
     class Meta:
         model = Talk
         name = 'Talk'

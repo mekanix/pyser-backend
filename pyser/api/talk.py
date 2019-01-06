@@ -9,16 +9,16 @@ from .pagination import paginate, parser
 from .schemas import TalkSchema
 
 
-@ns_talk.route('', endpoint='talks')
+@ns_talk.route('/<year>', endpoint='talks')
 class TalkListAPI(Resource):
     @ns_talk.expect(parser)
-    def get(self):
+    def get(self, year):
         """Get list of talks"""
         return paginate(Talk.select(), TalkSchema())
 
     @jwt_required
     @ns_talk.expect(TalkSchema.fields())
-    def post(self):
+    def post(self, year):
         """Create new talk"""
         try:
             user = User.get(email=get_jwt_identity())
@@ -46,9 +46,9 @@ class TalkListAPI(Resource):
         return response
 
 
-@ns_talk.route('/<talk_id>', endpoint='talk')
+@ns_talk.route('/<year>/<talk_id>', endpoint='talk')
 class TalkDetailAPI(Resource):
-    def get(self, talk_id):
+    def get(self, year, talk_id):
         """Get talk details"""
         try:
             talk = Talk.get(id=talk_id)
@@ -62,7 +62,7 @@ class TalkDetailAPI(Resource):
 
     @jwt_required
     @ns_talk.expect(TalkSchema.fields())
-    def patch(self, talk_id):
+    def patch(self, year, talk_id):
         """Edit talk"""
         try:
             user = User.get(email=get_jwt_identity())
@@ -97,7 +97,7 @@ class TalkDetailAPI(Resource):
         return response
 
     @jwt_required
-    def delete(self, talk_id):
+    def delete(self, year, talk_id):
         """Delete talk"""
         try:
             talk = Talk.get(id=talk_id)
