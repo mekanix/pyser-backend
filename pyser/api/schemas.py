@@ -135,6 +135,7 @@ class TalkSchema(BaseSchema):
     start = fields.DateTime(format=datetime_format)
     text = fields.String(description='Long talk description')
     title = fields.String(description='Talk title')
+    hall = fields.String(description='Hall name')
     user = fields.Nested(UserSchema)
 
     @pre_dump

@@ -3,6 +3,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restplus import Resource
 
 from ..models.auth import User
+from ..models.event import Event
 from ..models.talk import Talk
 from .namespaces import ns_talk
 from .pagination import paginate, parser
@@ -14,7 +15,11 @@ class TalkListAPI(Resource):
     @ns_talk.expect(parser)
     def get(self, year):
         """Get list of talks"""
-        return paginate(Talk.select(), TalkSchema())
+        try:
+            event = Event.get(year=int(year))
+        except Event.DoesNotExist:
+            return {'message': 'No such event'}, 404
+        return paginate(event.talks, TalkSchema())
 
     @jwt_required
     @ns_talk.expect(TalkSchema.fields())
@@ -24,6 +29,10 @@ class TalkListAPI(Resource):
             user = User.get(email=get_jwt_identity())
         except User.DoesNotExist:
             return {'message': 'User not found'}, 404
+        try:
+            event = Event.get(year=int(year))
+        except Event.DoesNotExist:
+            return {'message': 'No such event'}, 404
         schema = TalkSchema()
         talk, errors = schema.load(current_app.api.payload)
         if errors:
@@ -39,6 +48,8 @@ class TalkListAPI(Resource):
                     return {'message': 'User not found'}, 404
             except User.DoesNotExist:
                 talk.user = user
+        talk.event = event
+        print(talk.event)
         talk.save()
         response, errors = schema.dump(talk)
         if errors:
@@ -51,7 +62,11 @@ class TalkDetailAPI(Resource):
     def get(self, year, talk_id):
         """Get talk details"""
         try:
-            talk = Talk.get(id=talk_id)
+            event = Event.get(year=int(year))
+        except Event.DoesNotExist:
+            return {'message': 'No such event'}, 404
+        try:
+            talk = Talk.get(id=talk_id, event=event)
         except Talk.DoesNotExist:
             return {'message': 'No such talk'}, 404
         schema = TalkSchema()
@@ -69,7 +84,11 @@ class TalkDetailAPI(Resource):
         except User.DoesNotExist:
             return {'message': 'User not found'}, 404
         try:
-            talk = Talk.get(id=talk_id)
+            event = Event.get(year=int(year))
+        except Event.DoesNotExist:
+            return {'message': 'No such event'}, 404
+        try:
+            talk = Talk.get(id=talk_id, event=event)
         except Talk.DoesNotExist:
             return {'message': 'No such talk'}, 404
         schema = TalkSchema()
@@ -100,7 +119,15 @@ class TalkDetailAPI(Resource):
     def delete(self, year, talk_id):
         """Delete talk"""
         try:
-            talk = Talk.get(id=talk_id)
+            User.get(email=get_jwt_identity())
+        except User.DoesNotExist:
+            return {'message': 'User not found'}, 404
+        try:
+            event = Event.get(year=int(year))
+        except Event.DoesNotExist:
+            return {'message': 'No such event'}, 404
+        try:
+            talk = Talk.get(id=talk_id, event=event)
         except Talk.DoesNotExist:
             return {'message': 'No such talk'}, 404
         schema = TalkSchema()
