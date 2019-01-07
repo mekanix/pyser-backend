@@ -36,7 +36,7 @@ class TalkListAPI(Resource):
         schema = TalkSchema()
         talk, errors = schema.load(current_app.api.payload)
         if errors:
-            return errors, 400
+            return errors, 409
         if not user.admin:
             talk.user = user
         else:
@@ -49,7 +49,6 @@ class TalkListAPI(Resource):
             except User.DoesNotExist:
                 talk.user = user
         talk.event = event
-        print(talk.event)
         talk.save()
         response, errors = schema.dump(talk)
         if errors:

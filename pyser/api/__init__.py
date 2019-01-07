@@ -55,6 +55,7 @@ def create_api(app):
         blog,
         event,
         gallery,
+        hall,
         me,
         talk,
         user,

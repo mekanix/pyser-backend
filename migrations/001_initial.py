@@ -1,3 +1,4 @@
+# flake8: noqa
 """Peewee migrations -- 001_initial.py.
 
 Some examples (model - class or model name)::
@@ -21,13 +22,7 @@ Some examples (model - class or model name)::
 
 """
 
-import datetime as dt
 import peewee as pw
-
-try:
-    import playhouse.postgres_ext as pw_pext
-except ImportError:
-    pass
 
 SQL = pw.SQL
 
@@ -60,7 +55,12 @@ def migrate(migrator, database, fake=False, **kwargs):
     @migrator.create_model
     class Blog(pw.Model):
         id = pw.AutoField()
-        author = pw.ForeignKeyField(backref='blogs', column_name='author_id', field='id', model=migrator.orm['users'])
+        author = pw.ForeignKeyField(
+            backref='blogs',
+            column_name='author_id',
+            field='id',
+            model=migrator.orm['users']
+        )
         content = pw.TextField()
         date = pw.DateTimeField()
         published = pw.BooleanField()
@@ -75,6 +75,7 @@ def migrate(migrator, database, fake=False, **kwargs):
         id = pw.AutoField()
         year = pw.IntegerField(unique=True)
         published = pw.BooleanField(constraints=[SQL("DEFAULT False")])
+        mainHall = pw.TextField()
 
         class Meta:
             table_name = "event"
@@ -82,7 +83,13 @@ def migrate(migrator, database, fake=False, **kwargs):
     @migrator.create_model
     class GalleryAlbum(pw.Model):
         id = pw.AutoField()
-        event = pw.ForeignKeyField(backref='albums', column_name='event_id', field='id', model=migrator.orm['event'], null=True)
+        event = pw.ForeignKeyField(
+            backref='albums',
+            column_name='event_id',
+            field='id',
+            model=migrator.orm['event'],
+            null=True
+        )
         name = pw.TextField(index=True)
 
         class Meta:
@@ -91,11 +98,30 @@ def migrate(migrator, database, fake=False, **kwargs):
     @migrator.create_model
     class GalleryFile(pw.Model):
         id = pw.AutoField()
-        album = pw.ForeignKeyField(backref='files', column_name='album_id', field='id', model=migrator.orm['galleryalbum'])
+        album = pw.ForeignKeyField(
+            backref='files',
+            column_name='album_id',
+            field='id',
+            model=migrator.orm['galleryalbum']
+        )
         filename = pw.TextField(index=True)
 
         class Meta:
             table_name = "galleryfile"
+
+    @migrator.create_model
+    class Hall(pw.Model):
+        id = pw.AutoField()
+        name = pw.TextField()
+        event = pw.ForeignKeyField(
+            backref='halls',
+            column_name='event_id',
+            field='id',
+            model=migrator.orm['event']
+        )
+
+        class Meta:
+            table_name = "hall"
 
     @migrator.create_model
     class Role(pw.Model):
@@ -116,8 +142,18 @@ def migrate(migrator, database, fake=False, **kwargs):
         start = pw.DateTimeField(null=True)
         text = pw.TextField()
         title = pw.TextField()
-        user = pw.ForeignKeyField(backref='talks', column_name='user_id', field='id', model=migrator.orm['users'])
-        event = pw.ForeignKeyField(backref='talks', column_name='event_id', field='id', model=migrator.orm['event'])
+        user = pw.ForeignKeyField(
+            backref='talks',
+            column_name='user_id',
+            field='id',
+            model=migrator.orm['users']
+        )
+        event = pw.ForeignKeyField(
+            backref='talks',
+            column_name='event_id',
+            field='id',
+            model=migrator.orm['event']
+        )
 
         class Meta:
             table_name = "talk"
@@ -125,12 +161,21 @@ def migrate(migrator, database, fake=False, **kwargs):
     @migrator.create_model
     class UserRoles(pw.Model):
         id = pw.AutoField()
-        role = pw.ForeignKeyField(backref='users', column_name='role_id', field='id', model=migrator.orm['role'])
-        user = pw.ForeignKeyField(backref='roles', column_name='user_id', field='id', model=migrator.orm['users'])
+        role = pw.ForeignKeyField(
+            backref='users',
+            column_name='role_id',
+            field='id',
+            model=migrator.orm['role']
+        )
+        user = pw.ForeignKeyField(
+            backref='roles',
+            column_name='user_id',
+            field='id',
+            model=migrator.orm['users']
+        )
 
         class Meta:
             table_name = "userroles"
-
 
 
 def rollback(migrator, database, fake=False, **kwargs):
@@ -141,6 +186,8 @@ def rollback(migrator, database, fake=False, **kwargs):
     migrator.remove_model('talk')
 
     migrator.remove_model('role')
+
+    migrator.remove_model('hall')
 
     migrator.remove_model('galleryfile')
 

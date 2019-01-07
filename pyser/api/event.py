@@ -4,6 +4,7 @@ from flask_restplus import Resource
 
 from ..models.event import Event
 from ..models.gallery import GalleryAlbum
+from ..models.hall import Hall
 from .namespaces import ns_event
 from .pagination import paginate, parser
 from .schemas import EventSchema
@@ -26,9 +27,12 @@ class EventListAPI(Resource):
             Event.get(year=event.year)
             return {'message': 'Event in that year already exists'}, 409
         except Event.DoesNotExist:
+            event.mainHall = 'main'
             event.save()
         gallery_album = GalleryAlbum(event=event, name='main')
         gallery_album.save()
+        hall = Hall(event=event, name='main')
+        hall.save()
         response, errors = schema.dump(event)
         if errors:
             return errors, 409

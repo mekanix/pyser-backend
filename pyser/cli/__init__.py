@@ -7,6 +7,7 @@ from peewee_migrate import Router
 from pyser.models.auth import User
 from pyser.models.event import Event
 from pyser.models.gallery import GalleryAlbum
+from pyser.models.hall import Hall
 
 events = AppGroup('events', help='Event operations')
 migration = AppGroup('migration', help='Manage DB migrations')
@@ -17,13 +18,15 @@ def registerEvents(app):
     @click.argument('year')
     def create(year):
         try:
-            event = Event(year=int(year), published=True)
+            event = Event(year=int(year), published=True, mainHall='main')
             event.save()
-            album = GalleryAlbum(event=event, name='main')
-            album.save()
         except IntegrityError as e:
-            print(e)
-            print('Default event and gallery album already exist')
+            print('Default event already exists')
+            return
+        album = GalleryAlbum(event=event, name='main')
+        album.save()
+        hall = Hall(event=event, name='main')
+        hall.save()
 
     app.cli.add_command(events)
 

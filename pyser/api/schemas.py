@@ -11,6 +11,7 @@ from ..models.auth import Role, User, UserRoles
 from ..models.blog import Blog
 from ..models.event import Event
 from ..models.gallery import GalleryAlbum, GalleryFile
+from ..models.hall import Hall
 from ..models.parsing import TokenModel
 from ..models.talk import Talk
 
@@ -200,6 +201,7 @@ class BlogSchema(BaseSchema):
 class EventSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     year = fields.Integer(description='Year')
+    mainHall = fields.Str(description='Main hall')
 
     class Meta:
         model = Event
@@ -219,18 +221,29 @@ class GalleryAlbumSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     name = fields.String(description='Album name')
     files = fields.List(fields.Nested(GalleryFileSchema), many=True)
-    event = fields.Nested(EventSchema)
+    event = fields.Nested(EventSchema, dump_only=True)
 
     class Meta:
         model = GalleryAlbum
         name = 'GalleryAlbum'
 
 
+class HallSchema(BaseSchema):
+    id = fields.Integer(description='ID', dump_only=True)
+    name = fields.String(description='Hall name')
+    event = fields.Nested(EventSchema, dump_only=True)
+
+    class Meta:
+        model = Hall
+        name = 'Hall'
+
+
 schemas = [
     BlogSchema,
+    EventSchema,
     GalleryAlbumSchema,
     GalleryFileSchema,
-    EventSchema,
+    HallSchema,
     RoleSchema,
     TalkSchema,
     TokenSchema,
