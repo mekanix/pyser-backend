@@ -57,16 +57,12 @@ class TalkListAPI(Resource):
         return response
 
 
-@ns_talk.route('/<year>/<talk_id>', endpoint='talk')
+@ns_talk.route('/<talk_id>', endpoint='talk')
 class TalkDetailAPI(Resource):
-    def get(self, year, talk_id):
+    def get(self, talk_id):
         """Get talk details"""
         try:
-            event = Event.get(year=int(year))
-        except Event.DoesNotExist:
-            return {'message': 'No such event'}, 404
-        try:
-            talk = Talk.get(id=talk_id, event=event)
+            talk = Talk.get(id=talk_id)
         except Talk.DoesNotExist:
             return {'message': 'No such talk'}, 404
         schema = TalkSchema()
@@ -77,18 +73,14 @@ class TalkDetailAPI(Resource):
 
     @jwt_required
     @ns_talk.expect(TalkSchema.fields())
-    def patch(self, year, talk_id):
+    def patch(self, talk_id):
         """Edit talk"""
         try:
             user = User.get(email=get_jwt_identity())
         except User.DoesNotExist:
             return {'message': 'User not found'}, 404
         try:
-            event = Event.get(year=int(year))
-        except Event.DoesNotExist:
-            return {'message': 'No such event'}, 404
-        try:
-            talk = Talk.get(id=talk_id, event=event)
+            talk = Talk.get(id=talk_id)
         except Talk.DoesNotExist:
             return {'message': 'No such talk'}, 404
         schema = TalkSchema()
@@ -116,18 +108,14 @@ class TalkDetailAPI(Resource):
         return response
 
     @jwt_required
-    def delete(self, year, talk_id):
+    def delete(self, talk_id):
         """Delete talk"""
         try:
             User.get(email=get_jwt_identity())
         except User.DoesNotExist:
             return {'message': 'User not found'}, 404
         try:
-            event = Event.get(year=int(year))
-        except Event.DoesNotExist:
-            return {'message': 'No such event'}, 404
-        try:
-            talk = Talk.get(id=talk_id, event=event)
+            talk = Talk.get(id=talk_id)
         except Talk.DoesNotExist:
             return {'message': 'No such talk'}, 404
         schema = TalkSchema()

@@ -26,6 +26,9 @@ class User(Model, UserMixin):
     confirmed_at = DateTimeField(null=True)
     email = TextField()
     password = TextField()
+    firstName = TextField(null=True)
+    lastName = TextField(null=True)
+    bio = TextField(null=True)
 
 
 class UserRoles(Model):

@@ -1,13 +1,15 @@
 import click
 
 from flask.cli import AppGroup
+from flask_security.cli import users
 from peewee import IntegrityError
 from peewee_migrate import Router
+from pyser.models.auth import User
 from pyser.models.event import Event
 from pyser.models.gallery import GalleryAlbum
 
-events = AppGroup('events')
-migration = AppGroup('migration')
+events = AppGroup('events', help='Event operations')
+migration = AppGroup('migration', help='Manage DB migrations')
 
 
 def registerEvents(app):
@@ -22,6 +24,8 @@ def registerEvents(app):
         except IntegrityError as e:
             print(e)
             print('Default event and gallery album already exist')
+
+    app.cli.add_command(events)
 
 
 def registerMigration(app):
@@ -41,9 +45,34 @@ def registerMigration(app):
     def run():
         router.run()
 
+    app.cli.add_command(migration)
+
+
+def registerUser(app):
+    @users.command()
+    @click.argument('email')
+    def admin(email):
+        """Proclaim user an admin"""
+        try:
+            user = User.get(email=email)
+            user.admin = True
+            user.save()
+        except User.DoesNotExist:
+            print('No such user')
+
+    @users.command()
+    @click.argument('email')
+    def deadmin(email):
+        """Remove admin priviledges from user"""
+        try:
+            user = User.get(email=email)
+            user.admin = False
+            user.save()
+        except User.DoesNotExist:
+            print('No such user')
+
 
 def register(app):
     registerEvents(app)
     registerMigration(app)
-    app.cli.add_command(events)
-    app.cli.add_command(migration)
+    registerUser(app)

@@ -121,6 +121,9 @@ class UserSchema(BaseSchema):
         description='Time when user was confirmed',
         dump_only=True,
     )
+    firstName = fields.Str(required=True, description='First name')
+    lastName = fields.Str(required=True, description='Last name')
+    bio = fields.Str(required=True, description='Biography')
 
     class Meta:
         model = User
@@ -136,7 +139,7 @@ class TalkSchema(BaseSchema):
     text = fields.String(description='Long talk description')
     title = fields.String(description='Talk title')
     hall = fields.String(description='Hall name')
-    user = fields.Nested(UserSchema)
+    user = fields.Nested(UserSchema, dump_only=True)
 
     @pre_dump
     def convert_date(self, data):
