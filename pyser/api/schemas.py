@@ -11,6 +11,7 @@ from ..models.auth import Role, User, UserRoles
 from ..models.blog import Blog
 from ..models.event import Event
 from ..models.gallery import GalleryAlbum, GalleryFile
+from ..models.hall import Hall
 from ..models.parsing import TokenModel
 from ..models.talk import Talk
 
@@ -121,6 +122,9 @@ class UserSchema(BaseSchema):
         description='Time when user was confirmed',
         dump_only=True,
     )
+    firstName = fields.Str(required=True, description='First name')
+    lastName = fields.Str(required=True, description='Last name')
+    bio = fields.Str(required=True, description='Biography')
 
     class Meta:
         model = User
@@ -135,7 +139,27 @@ class TalkSchema(BaseSchema):
     start = fields.DateTime(format=datetime_format)
     text = fields.String(description='Long talk description')
     title = fields.String(description='Talk title')
-    user = fields.Nested(UserSchema)
+    hall = fields.String(description='Hall name')
+    user = fields.Nested(UserSchema, dump_only=True)
+
+    @pre_dump
+    def convert_date(self, data):
+        start = getattr(data, 'start', None)
+        end = getattr(data, 'end', None)
+        if None in [start, end]:
+            return data
+        newdata = copy(data)
+        if (type(data.start) == str):
+            newdata.start = datetime.datetime.strptime(
+                data.start,
+                peewee_datetime_format
+            )
+        if (type(data.end) == str):
+            newdata.end = datetime.datetime.strptime(
+                data.end,
+                peewee_datetime_format
+            )
+        return newdata
 
     class Meta:
         model = Talk
@@ -177,6 +201,7 @@ class BlogSchema(BaseSchema):
 class EventSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     year = fields.Integer(description='Year')
+    mainHall = fields.Str(description='Main hall')
 
     class Meta:
         model = Event
@@ -196,18 +221,29 @@ class GalleryAlbumSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     name = fields.String(description='Album name')
     files = fields.List(fields.Nested(GalleryFileSchema), many=True)
-    event = fields.Nested(EventSchema)
+    event = fields.Nested(EventSchema, dump_only=True)
 
     class Meta:
         model = GalleryAlbum
         name = 'GalleryAlbum'
 
 
+class HallSchema(BaseSchema):
+    id = fields.Integer(description='ID', dump_only=True)
+    name = fields.String(description='Hall name')
+    event = fields.Nested(EventSchema, dump_only=True)
+
+    class Meta:
+        model = Hall
+        name = 'Hall'
+
+
 schemas = [
     BlogSchema,
+    EventSchema,
     GalleryAlbumSchema,
     GalleryFileSchema,
-    EventSchema,
+    HallSchema,
     RoleSchema,
     TalkSchema,
     TokenSchema,

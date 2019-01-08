@@ -3,31 +3,40 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restplus import Resource
 
 from ..models.auth import User
+from ..models.event import Event
 from ..models.talk import Talk
 from .namespaces import ns_talk
 from .pagination import paginate, parser
 from .schemas import TalkSchema
 
 
-@ns_talk.route('', endpoint='talks')
+@ns_talk.route('/<year>', endpoint='talks')
 class TalkListAPI(Resource):
     @ns_talk.expect(parser)
-    def get(self):
+    def get(self, year):
         """Get list of talks"""
-        return paginate(Talk.select(), TalkSchema())
+        try:
+            event = Event.get(year=int(year))
+        except Event.DoesNotExist:
+            return {'message': 'No such event'}, 404
+        return paginate(event.talks, TalkSchema())
 
     @jwt_required
     @ns_talk.expect(TalkSchema.fields())
-    def post(self):
+    def post(self, year):
         """Create new talk"""
         try:
             user = User.get(email=get_jwt_identity())
         except User.DoesNotExist:
             return {'message': 'User not found'}, 404
+        try:
+            event = Event.get(year=int(year))
+        except Event.DoesNotExist:
+            return {'message': 'No such event'}, 404
         schema = TalkSchema()
         talk, errors = schema.load(current_app.api.payload)
         if errors:
-            return errors, 400
+            return errors, 409
         if not user.admin:
             talk.user = user
         else:
@@ -39,6 +48,7 @@ class TalkListAPI(Resource):
                     return {'message': 'User not found'}, 404
             except User.DoesNotExist:
                 talk.user = user
+        talk.event = event
         talk.save()
         response, errors = schema.dump(talk)
         if errors:
@@ -99,6 +109,10 @@ class TalkDetailAPI(Resource):
     @jwt_required
     def delete(self, talk_id):
         """Delete talk"""
+        try:
+            User.get(email=get_jwt_identity())
+        except User.DoesNotExist:
+            return {'message': 'User not found'}, 404
         try:
             talk = Talk.get(id=talk_id)
         except Talk.DoesNotExist:
