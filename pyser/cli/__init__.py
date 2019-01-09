@@ -48,6 +48,11 @@ def registerMigration(app):
     def run():
         router.run()
 
+    @migration.command()
+    @click.argument('name')
+    def rollback(name):
+        router.rollback(name)
+
     app.cli.add_command(migration)
 
 
