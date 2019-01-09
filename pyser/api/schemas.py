@@ -9,12 +9,12 @@ from marshmallow.exceptions import ValidationError
 from ..date import datetime_format, peewee_datetime_format
 from ..models.auth import Role, User, UserRoles
 from ..models.blog import Blog
+from ..models.cfs import CfS
 from ..models.event import Event
 from ..models.gallery import GalleryAlbum, GalleryFile
 from ..models.hall import Hall
 from ..models.parsing import TokenModel
 from ..models.talk import Talk
-
 
 def marshmallowToField(field, required=None):
     typeOfField = type(field)
@@ -237,9 +237,21 @@ class HallSchema(BaseSchema):
         model = Hall
         name = 'Hall'
 
+class CfSSchema(BaseSchema):
+    id = fields.Integer(description='ID', dump_only=True)
+    email = fields.String(description='CfS email')
+    organisation = fields.String(description='CfS organisation')
+    message = fields.String(description='CfS Message')
+    event = fields.Nested(EventSchema, dump_only=True)
+
+    class Meta:
+        model = CfS
+        name = 'CfS'
+
 
 schemas = [
     BlogSchema,
+    CfSSchema,
     EventSchema,
     GalleryAlbumSchema,
     GalleryFileSchema,
