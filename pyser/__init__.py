@@ -2,7 +2,7 @@ from flask import Blueprint, Flask
 from flask_collect import Collect
 from flask_jwt_extended import JWTManager
 from flask_security import PeeweeUserDatastore, Security
-
+from flask_mail import Mail
 from .api import create_api
 from .db import db
 
@@ -39,6 +39,7 @@ def create_app(config, app=None):
     )
     app.security = Security(app, app.user_datastore)
     app.jwt = JWTManager(app)
+    app.mail = Mail(app)
     create_api(app)
 
     return app

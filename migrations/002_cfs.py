@@ -1,3 +1,4 @@
+# flake8: noqa
 """Peewee migrations -- 002_cfs.py.
 
 Some examples (model - class or model name)::
@@ -21,13 +22,7 @@ Some examples (model - class or model name)::
 
 """
 
-import datetime as dt
 import peewee as pw
-
-try:
-    import playhouse.postgres_ext as pw_pext
-except ImportError:
-    pass
 
 SQL = pw.SQL
 
@@ -35,12 +30,21 @@ SQL = pw.SQL
 def migrate(migrator, database, fake=False, **kwargs):
     """Write your migrations here."""
 
-    migrator.change_fields('users', active=pw.BooleanField(constraints=[SQL("DEFAULT True")]),
-        admin=pw.BooleanField(constraints=[SQL("DEFAULT False")]))
+    migrator.change_fields(
+        'users',
+        active=pw.BooleanField(constraints=[SQL("DEFAULT True")]),
+        admin=pw.BooleanField(constraints=[SQL("DEFAULT False")])
+    )
 
-    migrator.change_fields('event', published=pw.BooleanField(constraints=[SQL("DEFAULT False")]))
+    migrator.change_fields(
+        'event',
+        published=pw.BooleanField(constraints=[SQL("DEFAULT False")])
+    )
 
-    migrator.change_fields('talk', published=pw.BooleanField(constraints=[SQL("DEFAULT False")]))
+    migrator.change_fields(
+        'talk',
+        published=pw.BooleanField(constraints=[SQL("DEFAULT False")])
+    )
 
     @migrator.create_model
     class CfS(pw.Model):
@@ -48,11 +52,15 @@ def migrate(migrator, database, fake=False, **kwargs):
         email = pw.TextField()
         organisation = pw.TextField()
         message = pw.TextField()
-        event = pw.ForeignKeyField(backref='cfs', column_name='event_id', field='id', model=migrator.orm['event'])
+        event = pw.ForeignKeyField(
+            backref='cfs',
+            column_name='event_id',
+            field='id',
+            model=migrator.orm['event']
+        )
 
         class Meta:
             table_name = "cfs"
-
 
 
 def rollback(migrator, database, fake=False, **kwargs):

@@ -2,7 +2,7 @@ from flask_restplus.namespace import Namespace
 
 ns_auth = Namespace('auth', description='Auth operations')
 ns_blog = Namespace('blog', description='Blog operations')
-ns_cfs= Namespace('cfs', description='Call for sponsors')
+ns_cfs = Namespace('cfs', description='Call for sponsors')
 ns_event = Namespace('event', description='Event operations')
 ns_gallery = Namespace('gallery', description='Gallery operations')
 ns_hall = Namespace('hall', description='Hall operations')
