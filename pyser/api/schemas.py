@@ -16,6 +16,7 @@ from ..models.hall import Hall
 from ..models.parsing import TokenModel
 from ..models.talk import Talk
 
+
 def marshmallowToField(field, required=None):
     typeOfField = type(field)
     subtype = None
@@ -236,6 +237,7 @@ class HallSchema(BaseSchema):
     class Meta:
         model = Hall
         name = 'Hall'
+
 
 class CfSSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)

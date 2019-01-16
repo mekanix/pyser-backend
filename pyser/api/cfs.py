@@ -9,6 +9,7 @@ from .namespaces import ns_cfs
 from .pagination import paginate, parser
 from .schemas import CfSSchema
 from peewee import fn
+from flask_mail import Message
 
 
 @ns_cfs.route('/<year>', endpoint='cfs_list')
@@ -21,6 +22,7 @@ class cfsAPI(Resource):
         except Event.DoesNotExist:
             return {'message': 'No such event'}, 404
         return paginate(event.cfs, CfSSchema())
+
 
 @ns_cfs.route('', endpoint='cfs_create')
 class CfSCreateAPI(Resource):
@@ -38,14 +40,21 @@ class CfSCreateAPI(Resource):
         response, errors = schema.dump(cfs)
         if errors:
             return errors, 409
+        message = f'Organization: {cfs.organisation}'
+        message += f'\nMessage: {cfs.message}'
+        print(cfs.email)
+        msg = Message("CfS", sender=cfs.email, recipients=["office@pyser.org"])
+        msg.body = message
+        current_app.mail.send(msg)
         return response
 
-@ns_cfs.route('/<hall_id>', endpoint='cfs')
+
+@ns_cfs.route('/<cfs_id>', endpoint='cfs')
 class CfSDetailAPI(Resource):
     def get(self, cfs_id):
         """Get cfs details"""
         try:
-            cfs = CfS.get(id=hall_id)
+            cfs = CfS.get(id=cfs_id)
         except CfS.DoesNotExist:
             return {'message': 'No such sponsor'}, 404
         schema = CfSSchema()
@@ -63,21 +72,15 @@ class CfSDetailAPI(Resource):
         except User.DoesNotExist:
             return {'message': 'User not found'}, 404
         try:
-            cfs= CfS.get(id=cfs_id)
+            cfs = CfS.get(id=cfs_id)
         except CfS.DoesNotExist:
             return {'message': 'No such sponsor'}, 404
         schema = CfSSchema()
         data, errors = schema.load(current_app.api.payload)
         if errors:
             return errors, 409
-        #  cfs.description = data.description or cfs.description
-        #  cfs.end = data.end or cfs.end
-        #  cfs.published = data.published or cfs.published
-        #  cfs.start = data.start or cfs.start
-        #  cfs.text = data.text or cfs.text
-        #  cfs.title = data.title or cfs.title
         try:
-            cfs_user= data.user
+            cfs_user = data.user
             try:
                 cfs.user = User.get(email=cfs_user.email)
             except User.DoesNotExist:
@@ -85,7 +88,7 @@ class CfSDetailAPI(Resource):
         except User.DoesNotExist:
             cfs.user = user
         cfs.save()
-        response, errors = schema.dump(hall)
+        response, errors = schema.dump(cfs)
         if errors:
             return errors, 409
         return response
@@ -98,7 +101,7 @@ class CfSDetailAPI(Resource):
         except User.DoesNotExist:
             return {'message': 'User not found'}, 404
         try:
-            cfs= CfS.get(id=cfs_id)
+            cfs = CfS.get(id=cfs_id)
         except CfS.DoesNotExist:
             return {'message': 'No such sponsor'}, 404
         schema = CfSSchema()

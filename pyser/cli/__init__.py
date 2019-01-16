@@ -20,7 +20,7 @@ def registerEvents(app):
         try:
             event = Event(year=int(year), published=True, mainHall='main')
             event.save()
-        except IntegrityError as e:
+        except IntegrityError:
             print('Default event already exists')
             return
         album = GalleryAlbum(event=event, name='main')
