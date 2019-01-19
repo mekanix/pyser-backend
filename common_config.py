@@ -1,5 +1,6 @@
 #  from datetime import timedelta
 import os
+
 SECRET_KEY = 'iQfPvB6sZaNHqVFI5CJa9rM1xOEVHKIM0LwifT04yLsPlZhSSvaDuZXOgJFSpJVq'
 
 
@@ -9,8 +10,7 @@ class Config:
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    DEFAULT_MAIL_SUBJECT_PREFIX = '[Pyser] '
-    DEFAULT_MAIL_SENDER = 'Pyser Admin <dervish13@tilda.center>'
+    MAIL_ADDRESS = 'office@pyser.org'
     DEBUG = False
     SECURITY_PASSWORD_SALT = 'tilda'
     SECRET_KEY = SECRET_KEY

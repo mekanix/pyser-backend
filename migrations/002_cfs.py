@@ -30,27 +30,11 @@ SQL = pw.SQL
 def migrate(migrator, database, fake=False, **kwargs):
     """Write your migrations here."""
 
-    migrator.change_fields(
-        'users',
-        active=pw.BooleanField(constraints=[SQL("DEFAULT True")]),
-        admin=pw.BooleanField(constraints=[SQL("DEFAULT False")])
-    )
-
-    migrator.change_fields(
-        'event',
-        published=pw.BooleanField(constraints=[SQL("DEFAULT False")])
-    )
-
-    migrator.change_fields(
-        'talk',
-        published=pw.BooleanField(constraints=[SQL("DEFAULT False")])
-    )
-
     @migrator.create_model
     class CfS(pw.Model):
         id = pw.AutoField()
         email = pw.TextField()
-        organisation = pw.TextField()
+        organization = pw.TextField()
         message = pw.TextField()
         event = pw.ForeignKeyField(
             backref='cfs',

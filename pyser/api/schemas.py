@@ -241,8 +241,8 @@ class HallSchema(BaseSchema):
 
 class CfSSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
-    email = fields.String(description='CfS email')
-    organisation = fields.String(description='CfS organisation')
+    email = fields.Email(description='CfS email')
+    organization = fields.String(description='CfS organization')
     message = fields.String(description='CfS Message')
     event = fields.Nested(EventSchema, dump_only=True)
 
