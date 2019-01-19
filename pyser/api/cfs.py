@@ -52,7 +52,7 @@ class CfSCreateAPI(Resource):
         return response
 
 
-@ns_cfs.route('/<cfs_id>', endpoint='cfs')
+@ns_cfs.route('/detail/<cfs_id>', endpoint='cfs')
 class CfSDetailAPI(Resource):
     def get(self, cfs_id):
         """Get cfs details"""

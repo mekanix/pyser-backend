@@ -1,6 +1,7 @@
 bcrypt
 flask-collect
 flask-jwt-extended
+flask-mail
 flask-restplus
 flask-security
 gunicorn
