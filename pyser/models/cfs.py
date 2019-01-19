@@ -8,6 +8,6 @@ Model = db.Model
 
 class CfS(Model):
     email = TextField()
-    organisation = TextField()
+    organization = TextField()
     message = TextField()
     event = ForeignKeyField(Event, related_name='cfs')

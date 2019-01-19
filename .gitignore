@@ -13,6 +13,7 @@ build
 cbsd.conf
 coverage.xml
 database.db
+local_config.py
 media/*
 !media/.keep
 site.retry

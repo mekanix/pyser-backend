@@ -1,15 +1,15 @@
-from flask import current_app
+from flask import current_app, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_mail import Message
 from flask_restplus import Resource
+from peewee import fn
 
 from ..models.auth import User
-from ..models.event import Event
 from ..models.cfs import CfS
+from ..models.event import Event
 from .namespaces import ns_cfs
 from .pagination import paginate, parser
 from .schemas import CfSSchema
-from peewee import fn
-from flask_mail import Message
 
 
 @ns_cfs.route('/<year>', endpoint='cfs_list')
@@ -40,16 +40,19 @@ class CfSCreateAPI(Resource):
         response, errors = schema.dump(cfs)
         if errors:
             return errors, 409
-        message = f'Organization: {cfs.organisation}'
-        message += f'\nMessage: {cfs.message}'
-        print(cfs.email)
-        msg = Message("CfS", sender=cfs.email, recipients=["office@pyser.org"])
-        msg.body = message
+        msg = Message(
+            '[PySer CfS] {}'.format(cfs.organization),
+            sender=cfs.email,
+            recipients=[current_app.config['MAIL_ADDRESS']],
+        )
+        referer = request.headers['Referer']
+        msg.body = cfs.message
+        msg.body += '\nCheck out {}/{}'.format(referer, cfs.id)
         current_app.mail.send(msg)
         return response
 
 
-@ns_cfs.route('/<cfs_id>', endpoint='cfs')
+@ns_cfs.route('/detail/<cfs_id>', endpoint='cfs')
 class CfSDetailAPI(Resource):
     def get(self, cfs_id):
         """Get cfs details"""
