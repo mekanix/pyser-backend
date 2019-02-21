@@ -10,6 +10,7 @@ from ..date import datetime_format, peewee_datetime_format
 from ..models.auth import Role, User, UserRoles
 from ..models.blog import Blog
 from ..models.cfs import CfS
+from ..models.cfp import CfP
 from ..models.event import Event
 from ..models.gallery import GalleryAlbum, GalleryFile
 from ..models.hall import Hall
@@ -125,46 +126,13 @@ class UserSchema(BaseSchema):
     )
     firstName = fields.Str(required=True, description='First name')
     lastName = fields.Str(required=True, description='Last name')
-    bio = fields.Str(required=True, description='Biography')
+    bio = fields.Str(required=True)
+    twitter = fields.Str()
+    facebook = fields.Str()
 
     class Meta:
         model = User
         name = 'User'
-
-
-class TalkSchema(BaseSchema):
-    id = fields.Integer(description='ID', dump_only=True)
-    description = fields.String(description='Short talk description')
-    end = fields.DateTime(format=datetime_format)
-    published = fields.Boolean(default=False)
-    start = fields.DateTime(format=datetime_format)
-    text = fields.String(description='Long talk description')
-    title = fields.String(description='Talk title')
-    hall = fields.String(description='Hall name')
-    user = fields.Nested(UserSchema, dump_only=True)
-
-    @pre_dump
-    def convert_date(self, data):
-        start = getattr(data, 'start', None)
-        end = getattr(data, 'end', None)
-        if None in [start, end]:
-            return data
-        newdata = copy(data)
-        if (type(data.start) == str):
-            newdata.start = datetime.datetime.strptime(
-                data.start,
-                peewee_datetime_format
-            )
-        if (type(data.end) == str):
-            newdata.end = datetime.datetime.strptime(
-                data.end,
-                peewee_datetime_format
-            )
-        return newdata
-
-    class Meta:
-        model = Talk
-        name = 'Talk'
 
 
 class BlogSchema(BaseSchema):
@@ -209,6 +177,44 @@ class EventSchema(BaseSchema):
         name = 'Event'
 
 
+class TalkSchema(BaseSchema):
+    id = fields.Integer(description='ID', dump_only=True)
+    description = fields.String(description='Short talk description')
+    end = fields.DateTime(format=datetime_format)
+    published = fields.Boolean(default=False)
+    start = fields.DateTime(format=datetime_format)
+    text = fields.String(description='Long talk description')
+    title = fields.String(description='Talk title')
+    hall = fields.String(description='Hall name')
+    user = fields.Nested(UserSchema, dump_only=True)
+    event = fields.Nested(EventSchema, dump_only=True)
+    type = fields.String(description='Talk type')
+    duration = fields.Integer(description='duration')
+
+    @pre_dump
+    def convert_date(self, data):
+        start = getattr(data, 'start', None)
+        end = getattr(data, 'end', None)
+        if None in [start, end]:
+            return data
+        newdata = copy(data)
+        if (type(data.start) == str):
+            newdata.start = datetime.datetime.strptime(
+                data.start,
+                peewee_datetime_format
+            )
+        if (type(data.end) == str):
+            newdata.end = datetime.datetime.strptime(
+                data.end,
+                peewee_datetime_format
+            )
+        return newdata
+
+    class Meta:
+        model = Talk
+        name = 'Talk'
+
+
 class GalleryFileSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     filename = fields.String(description='Filename')
@@ -251,8 +257,18 @@ class CfSSchema(BaseSchema):
         name = 'CfS'
 
 
+class CfPSchema(BaseSchema):
+    person = fields.Nested(UserSchema)
+    talk = fields.Nested(TalkSchema)
+
+    class Meta:
+        model = CfP
+        name = 'CfP'
+
+
 schemas = [
     BlogSchema,
+    CfPSchema,
     CfSSchema,
     EventSchema,
     GalleryAlbumSchema,

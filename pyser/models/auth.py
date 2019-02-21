@@ -29,6 +29,8 @@ class User(Model, UserMixin):
     firstName = TextField(null=True)
     lastName = TextField(null=True)
     bio = TextField(null=True)
+    twitter = TextField(null=True)
+    facebook = TextField(null=True)
 
 
 class UserRoles(Model):
