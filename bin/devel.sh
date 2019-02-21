@@ -7,6 +7,7 @@ export FLASK_ENV="development"
 API_ROOT="http://`hostname`:${FLASK_PORT}/api/v0/doc/"
 . ${BIN_DIR}/common.sh
 setup no
+pip install -U -r requirements_dev.txt
 
 
 echo "Backend"
