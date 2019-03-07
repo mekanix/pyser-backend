@@ -195,8 +195,6 @@ class TalkSchema(BaseSchema):
     def convert_date(self, data):
         start = getattr(data, 'start', None)
         end = getattr(data, 'end', None)
-        if None in [start, end]:
-            return data
         newdata = copy(data)
         if (type(data.start) == str):
             newdata.start = datetime.datetime.strptime(
