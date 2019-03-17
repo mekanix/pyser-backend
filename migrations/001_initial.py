@@ -76,7 +76,7 @@ def migrate(migrator, database, fake=False, **kwargs):
     class Event(pw.Model):
         id = pw.AutoField()
         year = pw.IntegerField(unique=True)
-        published = pw.BooleanField(constraints=[SQL("DEFAULT False")])
+        published = pw.BooleanField()
         mainHall = pw.TextField()
 
         class Meta:
@@ -135,7 +135,7 @@ def migrate(migrator, database, fake=False, **kwargs):
         description = pw.TextField()
         end = pw.DateTimeField(null=True)
         hall = pw.TextField(null=True)
-        published = pw.BooleanField(constraints=[SQL("DEFAULT False")])
+        published = pw.BooleanField()
         start = pw.DateTimeField(null=True)
         title = pw.TextField()
         type = pw.TextField()

@@ -10,27 +10,27 @@ from .pagination import paginate, parser
 from .schemas import TalkSchema
 
 
-@ns_talk.route('/<year>', endpoint='talks')
+@ns_talk.route('/year/<year_id>', endpoint='talks')
 class TalkListAPI(Resource):
     @ns_talk.expect(parser)
-    def get(self, year):
+    def get(self, year_id):
         """Get list of talks"""
         try:
-            event = Event.get(year=int(year))
+            event = Event.get(year=int(year_id))
         except Event.DoesNotExist:
             return {'message': 'No such event'}, 404
         return paginate(event.talks, TalkSchema())
 
     @jwt_required
     @ns_talk.expect(TalkSchema.fields())
-    def post(self, year):
+    def post(self, year_id):
         """Create new talk"""
         try:
             user = User.get(email=get_jwt_identity())
         except User.DoesNotExist:
             return {'message': 'User not found'}, 404
         try:
-            event = Event.get(year=int(year))
+            event = Event.get(year=int(year_id))
         except Event.DoesNotExist:
             return {'message': 'No such event'}, 404
         schema = TalkSchema()
@@ -88,9 +88,10 @@ class TalkDetailAPI(Resource):
             return errors, 409
         talk.description = data.description or talk.description
         talk.end = data.end or talk.end
-        talk.published = data.published or talk.published
+        published = getattr(data, 'published', None)
+        if published is not None:
+            talk.published = data.published
         talk.start = data.start or talk.start
-        talk.text = data.text or talk.text
         talk.title = data.title or talk.title
         try:
             talk_user = data.user

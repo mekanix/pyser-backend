@@ -16,12 +16,12 @@ Model = db.Model
 
 class Talk(Model):
     description = TextField()
+    duration = IntegerField()
     end = DateTimeField(formats=[datetime_format], null=True)
+    event = ForeignKeyField(Event, related_name='talks')
     hall = TextField(null=True)
-    published = BooleanField(default=False)
+    published = BooleanField()
     start = DateTimeField(formats=[datetime_format], null=True)
     title = TextField()
     type = TextField()
-    duration = IntegerField()
     user = ForeignKeyField(User, related_name='talks')
-    event = ForeignKeyField(Event, related_name='talks')
