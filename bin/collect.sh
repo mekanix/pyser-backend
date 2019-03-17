@@ -5,6 +5,6 @@ BIN_DIR=`dirname $0`
 . ${BIN_DIR}/common.sh
 setup
 
-rm -rf application/static
+rm -rf pyser/static
 flask collect --verbose
-rm -rf application/static/app
+rm -rf pyser/static/app
