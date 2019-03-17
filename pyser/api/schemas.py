@@ -181,7 +181,7 @@ class TalkSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     description = fields.String(description='Short talk description')
     end = fields.DateTime(format=datetime_format)
-    published = fields.Boolean(default=False)
+    published = fields.Boolean()
     start = fields.DateTime(format=datetime_format)
     text = fields.String(description='Long talk description')
     title = fields.String(description='Talk title')
