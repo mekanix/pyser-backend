@@ -22,5 +22,4 @@ class Talk(Model):
     published = BooleanField()
     start = DateTimeField(formats=[datetime_format], null=True)
     title = TextField()
-    type = TextField()
     user = ForeignKeyField(User, related_name='talks')

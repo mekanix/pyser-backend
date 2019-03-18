@@ -188,7 +188,6 @@ class TalkSchema(BaseSchema):
     hall = fields.String(description='Hall name')
     user = fields.Nested(UserSchema, dump_only=True)
     event = fields.Nested(EventSchema, dump_only=True)
-    type = fields.String(description='Talk type')
     duration = fields.Integer(description='duration')
 
     @pre_dump
