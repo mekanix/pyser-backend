@@ -180,7 +180,7 @@ class EventSchema(BaseSchema):
 class TalkSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     description = fields.String(description='Short talk description')
-    end = fields.DateTime(format=datetime_format)
+    end = fields.DateTime(format=datetime_format, dump_only=True)
     published = fields.Boolean()
     start = fields.DateTime(format=datetime_format)
     text = fields.String(description='Long talk description')
@@ -194,18 +194,15 @@ class TalkSchema(BaseSchema):
     @pre_dump
     def convert_date(self, data):
         start = getattr(data, 'start', None)
-        end = getattr(data, 'end', None)
+        duration = getattr(data, 'duration', None)
         newdata = copy(data)
         if (type(data.start) == str):
             newdata.start = datetime.datetime.strptime(
                 data.start,
                 peewee_datetime_format
             )
-        if (type(data.end) == str):
-            newdata.end = datetime.datetime.strptime(
-                data.end,
-                peewee_datetime_format
-            )
+        if None not in [duration, newdata.start]:
+            newdata.end = newdata.start + datetime.timedelta(minutes=duration)
         return newdata
 
     class Meta:
