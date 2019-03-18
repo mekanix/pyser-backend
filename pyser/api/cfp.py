@@ -16,7 +16,7 @@ Facebook: {person.facebook}
 Bio:
 {person.bio}
 Title: {talk.title}
-Type: {talk.type}
+Hall: {talk.hall}
 Duration: {talk.duration}min
 Description:
 {talk.description}
