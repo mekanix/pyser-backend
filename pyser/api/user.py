@@ -1,4 +1,5 @@
 from flask import current_app
+from flask_restplus import Resource
 
 from ..models.auth import User
 from .namespaces import ns_user
@@ -28,7 +29,7 @@ class UserListAPI(ProtectedResource):
 
 @ns_user.route('/<id>', endpoint='user')
 @ns_user.response(404, 'User not found')
-class UserAPI(ProtectedResource):
+class UserAPI(Resource):
     def get(self, id):
         """Get user details"""
         try:

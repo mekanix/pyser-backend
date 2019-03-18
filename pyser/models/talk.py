@@ -17,7 +17,6 @@ Model = db.Model
 class Talk(Model):
     description = TextField()
     duration = IntegerField()
-    end = DateTimeField(formats=[datetime_format], null=True)
     event = ForeignKeyField(Event, related_name='talks')
     hall = TextField(null=True)
     published = BooleanField()
