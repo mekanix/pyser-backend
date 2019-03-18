@@ -19,7 +19,7 @@ class BlogListAPI(Resource):
         """List blog"""
         email = get_jwt_identity()
         if email is None:
-            query = Blog.select().where(Blog.published == True)  # noqa: E712
+            query = Blog.select().where(Blog.published)
         else:
             query = Blog.select()
         return paginate(query, BlogSchema())

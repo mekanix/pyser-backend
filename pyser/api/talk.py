@@ -56,6 +56,19 @@ class TalkListAPI(Resource):
         return response
 
 
+@ns_talk.route('/year/<year_id>/published', endpoint='talks_published')
+class TalkListAPI(Resource):
+    @ns_talk.expect(parser)
+    def get(self, year_id):
+        """Get list of talks"""
+        try:
+            event = Event.get(year=int(year_id))
+        except Event.DoesNotExist:
+            return {'message': 'No such event'}, 404
+        query = event.talks.where(Talk.published)
+        return paginate(query, TalkSchema())
+
+
 @ns_talk.route('/<talk_id>', endpoint='talk')
 class TalkDetailAPI(Resource):
     def get(self, talk_id):
@@ -87,20 +100,12 @@ class TalkDetailAPI(Resource):
         if errors:
             return errors, 409
         talk.description = data.description or talk.description
-        talk.end = data.end or talk.end
         published = getattr(data, 'published', None)
         if published is not None:
             talk.published = data.published
         talk.start = data.start or talk.start
         talk.title = data.title or talk.title
-        try:
-            talk_user = data.user
-            try:
-                talk.user = User.get(email=talk_user.email)
-            except User.DoesNotExist:
-                return {'message': 'User not found'}, 404
-        except User.DoesNotExist:
-            talk.user = user
+        talk.hall = data.hall or talk.hall
         talk.save()
         response, errors = schema.dump(talk)
         if errors:
