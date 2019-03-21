@@ -8,6 +8,7 @@ from ..models.talk import Talk
 from .namespaces import ns_talk
 from .pagination import paginate, parser
 from .schemas import TalkSchema
+from .resources import ProtectedResource
 
 
 @ns_talk.route('/year/<year_id>', endpoint='talks')
@@ -54,6 +55,23 @@ class TalkListAPI(Resource):
         if errors:
             return errors, 409
         return response
+
+
+@ns_talk.route('/year/<year_id>/user', endpoint='talks_user')
+class TalkListAPI(ProtectedResource):
+    @ns_talk.expect(parser)
+    def get(self, year_id):
+        """Get list of talks by user"""
+        try:
+            user = User.get(email=get_jwt_identity())
+        except User.DoesNotExist:
+            return {'message': 'User not found'}, 404
+        try:
+            event = Event.get(year=int(year_id))
+        except Event.DoesNotExist:
+            return {'message': 'No such event'}, 404
+        query = event.talks.join(User).where(Talk.user == user)
+        return paginate(query, TalkSchema())
 
 
 @ns_talk.route('/year/<year_id>/published', endpoint='talks_published')
