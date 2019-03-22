@@ -1,7 +1,8 @@
 from flask import current_app
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restplus import Resource
 
+from ..models.auth import User
 from ..models.event import Event
 from ..models.gallery import GalleryAlbum
 from ..models.hall import Hall
@@ -29,6 +30,12 @@ class EventListAPI(Resource):
         except Event.DoesNotExist:
             event.mainHall = 'main'
             event.save()
+        try:
+            user = User.get(email=get_jwt_identity())
+        except User.DoesNotExist:
+            return {'message': 'User not found'}, 404
+        if not user.admin:
+            return {'message': 'Admin area'}, 403
         gallery_album = GalleryAlbum(event=event, name='main')
         gallery_album.save()
         hall = Hall(event=event, name='main')
