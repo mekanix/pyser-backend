@@ -1,6 +1,5 @@
 from math import ceil
 
-from flask_restplus import abort
 from flask_restplus.reqparse import RequestParser
 
 def_per_page = 10
@@ -34,7 +33,7 @@ def paginate(query, schema):
     paginated_query = query.limit(per_page).offset(offset)
     data, errors = schema.dump(paginated_query, many=True)
     if errors:
-        abort(409, errors)
+        return errors, 409
     return {
         'data': data,
         'pages': totalPages,
