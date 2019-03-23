@@ -15,7 +15,7 @@ database.db
 local_config.py
 media/*
 !media/.keep
-pyser/static/
+pyser/static
 site.retry
 test.db
 vars.mk
