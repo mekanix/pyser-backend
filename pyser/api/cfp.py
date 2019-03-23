@@ -47,6 +47,7 @@ class CfpAPI(Resource):
         try:
             cfp.person = User.get(email=cfp.person.email)
         except User.DoesNotExist:
+            cfp.person.active = True
             cfp.person.save()
         cfp.talk.event = Event.select().order_by(Event.year)[0]
         cfp.talk.user = cfp.person

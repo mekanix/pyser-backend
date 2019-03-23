@@ -45,7 +45,7 @@ def migrate(migrator, database, fake=False, **kwargs):
     @migrator.create_model
     class User(pw.Model):
         id = pw.AutoField()
-        active = pw.BooleanField(constraints=[SQL("DEFAULT True")])
+        active = pw.BooleanField(constraints=[SQL("DEFAULT False")])
         admin = pw.BooleanField(constraints=[SQL("DEFAULT False")])
         confirmed_at = pw.DateTimeField(null=True)
         email = pw.TextField()
@@ -77,7 +77,6 @@ def migrate(migrator, database, fake=False, **kwargs):
         id = pw.AutoField()
         year = pw.IntegerField(unique=True)
         published = pw.BooleanField()
-        mainHall = pw.TextField()
 
         class Meta:
             table_name = "event"
@@ -133,15 +132,13 @@ def migrate(migrator, database, fake=False, **kwargs):
     class Talk(pw.Model):
         id = pw.AutoField()
         description = pw.TextField()
-        end = pw.DateTimeField(null=True)
+        duration = pw.IntegerField()
+        event = pw.ForeignKeyField(backref='talks', column_name='event_id', field='id', model=migrator.orm['event'])
         hall = pw.TextField(null=True)
         published = pw.BooleanField()
         start = pw.DateTimeField(null=True)
         title = pw.TextField()
-        type = pw.TextField()
-        duration = pw.IntegerField()
         user = pw.ForeignKeyField(backref='talks', column_name='user_id', field='id', model=migrator.orm['users'])
-        event = pw.ForeignKeyField(backref='talks', column_name='event_id', field='id', model=migrator.orm['event'])
 
         class Meta:
             table_name = "talk"
