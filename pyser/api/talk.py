@@ -20,7 +20,15 @@ class TalkListAPI(Resource):
             event = Event.get(year=int(year_id))
         except Event.DoesNotExist:
             return {'message': 'No such event'}, 404
-        return paginate(event.talks, TalkSchema())
+        schema = TalkSchema()
+        data, errors = schema.dump(event.talks, many=True)
+        if errors:
+            return errors, 409
+        return {
+            'data': data,
+            'pages': 1,
+            'total': event.talks.count(),
+        }
 
     @jwt_required
     @ns_talk.expect(TalkSchema.fields())
