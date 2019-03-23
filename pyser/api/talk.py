@@ -92,7 +92,15 @@ class TalkListAPI(Resource):
         except Event.DoesNotExist:
             return {'message': 'No such event'}, 404
         query = event.talks.where(Talk.published)
-        return paginate(query, TalkSchema())
+        schema = TalkSchema()
+        data, errors = schema.dump(query, many=True)
+        if errors:
+            return errors, 409
+        return {
+            'data': data,
+            'pages': 1,
+            'total': event.talks.count(),
+        }
 
 
 @ns_talk.route('/<talk_id>', endpoint='talk')
