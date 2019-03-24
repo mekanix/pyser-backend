@@ -15,7 +15,7 @@ from .schemas import EventSchema
 class EventListAPI(Resource):
     @ns_event.expect(parser)
     def get(self):
-        return paginate(Event.select(), EventSchema())
+        return paginate(Event.select().order_by(Event.year.desc()), EventSchema())
 
     @jwt_required
     @ns_event.expect(EventSchema.fields())
