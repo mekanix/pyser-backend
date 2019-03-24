@@ -170,7 +170,7 @@ class BlogSchema(BaseSchema):
 class EventSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     year = fields.Integer(description='Year')
-    mainHall = fields.Str(description='Main hall')
+    published = fields.Boolean()
 
     class Meta:
         model = Event
