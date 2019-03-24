@@ -28,7 +28,7 @@ class EventListAPI(Resource):
             Event.get(year=event.year)
             return {'message': 'Event in that year already exists'}, 409
         except Event.DoesNotExist:
-            event.mainHall = 'main'
+            event.published = False
             event.save()
         try:
             user = User.get(email=get_jwt_identity())
