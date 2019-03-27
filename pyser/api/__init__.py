@@ -35,8 +35,8 @@ def create_api(app):
     app.api = ErrorFriendlyApi(
         api_v0,
         version='0',
-        title='StartKit API',
-        description='StartKit operations',
+        title='PySer API',
+        description='PySer operations',
         doc='/doc/',
         catch_all_404s=True,
         default='auth',
