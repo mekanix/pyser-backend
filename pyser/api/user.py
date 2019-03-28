@@ -1,5 +1,6 @@
 from flask import current_app
 from flask_restplus import Resource
+from flask_security.utils import hash_password
 
 from ..models.auth import User
 from .namespaces import ns_user
@@ -23,6 +24,7 @@ class UserListAPI(ProtectedResource):
         user, errors = schema.load(current_app.api.payload)
         if errors:
             return errors, 409
+        user.password = hash_password(user.password)
         user.save()
         return schema.dump(user)
 

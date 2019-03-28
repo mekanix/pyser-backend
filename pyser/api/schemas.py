@@ -21,6 +21,11 @@ from ..models.talk import Talk
 def marshmallowToField(field, required=None):
     typeOfField = type(field)
     subtype = None
+    if required is None:
+        field_required = field.required
+    else:
+        field_required = required
+
     if typeOfField in [fields.Email, fields.String, fields.UUID]:
         field_type = rest_fields.String
     elif typeOfField in [fields.Bool, fields.Boolean]:
@@ -34,14 +39,11 @@ def marshmallowToField(field, required=None):
         subtype = field.nested.fields()
     elif typeOfField == fields.List:
         field_type = rest_fields.List
-        subtype = marshmallowToField(field.container)
+        subtype = marshmallowToField(field.container, required)
     else:
         raise ValueError('Unknown field of type {}'.format(typeOfField))
+
     description = field.metadata.get('description', None)
-    if required is None:
-        field_required = field.required
-    else:
-        field_required = required
     if subtype is None:
         if field.default is missing:
             return field_type(
