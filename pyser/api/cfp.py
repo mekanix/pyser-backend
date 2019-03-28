@@ -49,7 +49,9 @@ class CfpAPI(Resource):
         except User.DoesNotExist:
             cfp.person.active = True
             cfp.person.save()
-        cfp.talk.event = Event.select().order_by(Event.year)[0]
+        cfp.talk.event = Event.select().where(
+            Event.published,
+        ).order_by(Event.year.desc())[0]
         cfp.talk.user = cfp.person
         cfp.talk.save()
         text = message_format.format(
