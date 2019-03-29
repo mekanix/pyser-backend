@@ -36,7 +36,7 @@ def marshmallowToField(field, required=None):
         field_type = rest_fields.DateTime
     elif typeOfField == fields.Nested:
         field_type = rest_fields.Nested
-        subtype = field.nested.fields()
+        subtype = field.nested.fields(required=required)
     elif typeOfField == fields.List:
         field_type = rest_fields.List
         subtype = marshmallowToField(field.container, required)
@@ -80,7 +80,7 @@ class BaseSchema(Schema):
             field = cls._declared_fields[name]
             if field.dump_only:
                 continue
-            marshal_fields[name] = marshmallowToField(field)
+            marshal_fields[name] = marshmallowToField(field, required)
         return Model(cls.Meta.name, marshal_fields)
 
 
