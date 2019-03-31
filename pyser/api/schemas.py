@@ -115,9 +115,8 @@ class UserSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     active = fields.Boolean(description='Activate the user', default=True)
     admin = fields.Boolean(description='Is the user admin?', default=False)
-    email = fields.Email(required=True, description='Email')
+    email = fields.Email(description='Email')
     password = fields.Str(
-        required=True,
         description='Password',
         load_only=True
     )
@@ -126,9 +125,9 @@ class UserSchema(BaseSchema):
         description='Time when user was confirmed',
         dump_only=True,
     )
-    firstName = fields.Str(required=True, description='First name')
-    lastName = fields.Str(required=True, description='Last name')
-    bio = fields.Str(required=True)
+    firstName = fields.Str(description='First name')
+    lastName = fields.Str(description='Last name')
+    bio = fields.Str()
     twitter = fields.Str()
     facebook = fields.Str()
 
