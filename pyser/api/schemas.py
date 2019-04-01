@@ -181,15 +181,16 @@ class EventSchema(BaseSchema):
 class TalkSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     description = fields.String(description='Short talk description')
+    duration = fields.Integer(description='duration')
     end = fields.DateTime(format=datetime_format, dump_only=True)
+    event = fields.Nested(EventSchema, dump_only=True)
+    hall = fields.String(description='Hall name')
     published = fields.Boolean()
     start = fields.DateTime(format=datetime_format)
     text = fields.String(description='Long talk description')
     title = fields.String(description='Talk title')
-    hall = fields.String(description='Hall name')
     user = fields.Nested(UserSchema, dump_only=True)
-    event = fields.Nested(EventSchema, dump_only=True)
-    duration = fields.Integer(description='duration')
+    video = fields.String(description='Talk video')
 
     @pre_dump
     def convert_date(self, data):

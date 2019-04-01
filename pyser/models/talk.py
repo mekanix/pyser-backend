@@ -23,3 +23,4 @@ class Talk(Model):
     start = DateTimeField(formats=[datetime_format], null=True)
     title = TextField()
     user = ForeignKeyField(User, related_name='talks')
+    video = TextField(null=True)
