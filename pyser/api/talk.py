@@ -1,6 +1,7 @@
 from flask import current_app
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restplus import Resource
+from urllib.parse import urlparse, parse_qs
 
 from ..models.auth import User
 from ..models.event import Event
@@ -140,6 +141,14 @@ class TalkDetailAPI(Resource):
         talk.start = data.start or talk.start
         talk.title = data.title or talk.title
         talk.hall = data.hall or talk.hall
+        video = getattr(data, 'video', None)
+        if video is not None:
+            url = urlparse(video)
+            args = parse_qs(url.query)
+            video_id = args.get('v', None)
+            if video_id is None:
+                return {'message': 'Wrong URL'}, 409
+            talk.video = video_id[0]
         talk.save()
         response, errors = schema.dump(talk)
         if errors:
