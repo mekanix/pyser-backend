@@ -107,9 +107,6 @@ class GalleryAlbumAPI(Resource):
 @ns_gallery.route('/upload/<name>', endpoint='upload')
 @ns_gallery.route('/upload/<name>/<int:year>', endpoint='year_upload')
 class GalleryUploadAPI(ProtectedResource):
-    def get(self, name, year=None):
-        pass
-
     @ns_gallery.expect(gallery_parser)
     def post(self, name, year=None):
         """Upload new file"""
@@ -140,6 +137,10 @@ class GalleryUploadAPI(ProtectedResource):
                 None,
             )
         )
+        filePath = galleryFile.path(media_path)
+        dirPath = os.path.dirname(filePath)
+        if not os.path.exists(dirPath):
+            os.makedirs(dirPath)
         with open(galleryFile.path(media_path), 'wb+') as f:
             f.write(file.stream.read())
         return {'message': 'OK'}
