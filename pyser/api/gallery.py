@@ -123,24 +123,24 @@ class GalleryUploadAPI(ProtectedResource):
             return {'message': 'No such album'}, 404
         args = gallery_parser.parse_args()
         file = args.get('file', None)
-        chunkNumber = args.get('resumableChunkNumber')
-        if chunkNumber == 1:
-            galleryFile, created = GalleryFile.get_or_create(
-                album=album,
-                filename=file.filename,
-            )
-            if created:
-                galleryFile.save()
+        if file is None:
+            return {'message': 'File must be provided'}, 409
         media_path = os.path.abspath(
             current_app.config.get(
                 'MEDIA_PATH',
                 None,
             )
         )
-        filePath = galleryFile.path(media_path)
-        dirPath = os.path.dirname(filePath)
-        if not os.path.exists(dirPath):
-            os.makedirs(dirPath)
+        galleryFile, created = GalleryFile.get_or_create(
+            album=album,
+            filename=file.filename,
+        )
+        if created:
+            galleryFile.save()
+            filePath = galleryFile.path(media_path)
+            dirPath = os.path.dirname(filePath)
+            if not os.path.exists(dirPath):
+                os.makedirs(dirPath)
         with open(galleryFile.path(media_path), 'wb+') as f:
             f.write(file.stream.read())
         return {'message': 'OK'}
