@@ -136,11 +136,13 @@ class GalleryUploadAPI(ProtectedResource):
             filename=file.filename,
         )
         if created:
-            galleryFile.save()
+            chunkNumber = args.get('resumableChunkNumber')
+            if chunkNumber == 1:
+                galleryFile.save()
             filePath = galleryFile.path(media_path)
             dirPath = os.path.dirname(filePath)
             if not os.path.exists(dirPath):
                 os.makedirs(dirPath)
-        with open(galleryFile.path(media_path), 'wb+') as f:
+        with open(galleryFile.path(media_path), 'ab+') as f:
             f.write(file.stream.read())
         return {'message': 'OK'}
