@@ -36,9 +36,7 @@ class GalleryAlbumListAPI(Resource):
         """Get list of albums"""
         if year is None:
             return paginate(
-                GalleryAlbum.select().where(
-                    GalleryAlbum.event == None  # noqa: E711
-                ),
+                GalleryAlbum.select().where(GalleryAlbum.event),
                 GalleryAlbumSchema(),
             )
         try:
@@ -93,7 +91,10 @@ class GalleryAlbumAPI(Resource):
         response, errors = schema.dump(album)
         if errors:
             return errors, 409
-        files = paginate(album.files, GalleryFileSchema())
+        files = paginate(
+            album.files.order_by(GalleryFile.filename),
+            GalleryFileSchema(),
+        )
         response['files'] = files['data']
         response['pages'] = files['pages']
         response['total'] = files['total']
