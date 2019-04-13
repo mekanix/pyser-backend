@@ -2,3 +2,4 @@
 devel_packages:
   - name: postgresql96-client
   - name: py36-sqlite3
+  - name: python

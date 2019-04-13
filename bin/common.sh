@@ -5,7 +5,7 @@ export BIN_DIR=`dirname $0`
 export PROJECT_ROOT=`readlink -f "${BIN_DIR}/.."`
 export VIRTUALENV=${VIRTUALENV:="backend"}
 export FLASK_ENV=${FLASK_ENV:="production"}
-export PY_VERSION=${PY_VERSION:="3.6"}
+export PY_VERSION=${PY_VERSION:=""}
 
 
 setup() {
