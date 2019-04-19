@@ -1,5 +1,5 @@
 from flask import current_app, request
-from flask_restplus import Resource, abort
+from flask_restplus import Resource
 from .namespaces import ns_cfp
 from .schemas import CfPSchema, TalkSchema
 from ..models.auth import User
@@ -41,6 +41,7 @@ class CfpAPI(Resource):
         username = current_app.config.get('MAIL_USER', None)
         password = current_app.config.get('MAIL_PASSWORD', None)
         host = current_app.config.get('MAIL_SERVER', None)
+        port = current_app.config.get('MAIL_PORT', 25)
         to = current_app.config.get('MAIL_ADDRESS', None)
         subject = subject_format.format(cfp.talk.title)
         fromAddress = cfp.person.email
@@ -59,7 +60,31 @@ class CfpAPI(Resource):
             person=cfp.person,
             referrer=request.referrer,
         )
-        error = send_mail(fromAddress, to, subject, text, username, password, host)
+        error = send_mail(
+            fromAddress,
+            to,
+            subject,
+            text,
+            username,
+            password,
+            host,
+            port,
+        )
+        if error:
+            return {'message': 'Unable to send email'}, 409
+        text = 'Talk "{}" submitted from your email address'.format(
+            cfp.talk.title,
+        )
+        error = send_mail(
+            'office@pyser.org',
+            fromAddress,
+            subject,
+            text,
+            username,
+            password,
+            host,
+            port,
+        )
         if error:
             return {'message': 'Unable to send email'}, 409
         schema = TalkSchema()
