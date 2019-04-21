@@ -38,7 +38,7 @@ class CfpAPI(Resource):
         cfp, errors = schema.load(current_app.api.payload)
         if errors:
             return errors, 409
-        username = current_app.config.get('MAIL_USER', None)
+        username = current_app.config.get('MAIL_USERNAME', None)
         password = current_app.config.get('MAIL_PASSWORD', None)
         host = current_app.config.get('MAIL_SERVER', None)
         port = current_app.config.get('MAIL_PORT', 25)
