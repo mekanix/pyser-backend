@@ -26,6 +26,14 @@ Description:
 {talk.description}
 """
 
+presenter_message_format = """
+Thank you for applying to Python Serbia conference! Your paper titled
+
+{}
+
+is in review.
+"""
+
 subject_format = "[CfP] {}"
 
 
@@ -72,9 +80,7 @@ class CfpAPI(Resource):
         )
         if error:
             return {'message': 'Unable to send email'}, 409
-        text = 'Talk "{}" submitted from your email address'.format(
-            cfp.talk.title,
-        )
+        text = presenter_message_format.format(cfp.talk.title)
         error = send_mail(
             'office@pyser.org',
             fromAddress,
