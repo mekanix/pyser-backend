@@ -11,7 +11,7 @@ from flask_jwt_extended import (
     unset_jwt_cookies
 )
 from flask_restplus import Resource, abort
-from flask_security.utils import verify_password
+from flask_security.utils import verify_password, hash_password
 
 from ..models.auth import User
 from .namespaces import ns_auth
@@ -99,3 +99,25 @@ class AuthRefreshAPI(Resource):
         )
         set_access_cookies(resp, access_token)
         return resp
+
+
+@ns_auth.route('/register', endpoint='register')
+class AuthRegisterAPI(Resource):
+    @ns_auth.expect(TokenSchema.fields())
+    def post(self):
+        schema = TokenSchema()
+        data, errors = schema.load(current_app.api.payload)
+        if errors:
+            return errors, 409
+        try:
+            User.get(email=data.email)
+            return {'message': 'User with such email already registered!'}, 409
+        except User.DoesNotExist:
+            user = User(
+                email=data.email,
+                password=hash_password(data.password),
+            )
+        user.admin = False
+        user.active = False
+        user.save()
+        return schema.dump(user)

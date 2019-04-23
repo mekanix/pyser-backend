@@ -67,7 +67,7 @@ class TalkListAPI(Resource):
 
 
 @ns_talk.route('/year/<year_id>/user', endpoint='talks_user')
-class TalkListAPI(ProtectedResource):
+class UserTalkListAPI(ProtectedResource):
     @ns_talk.expect(parser)
     def get(self, year_id):
         """Get list of talks by user"""
@@ -84,7 +84,7 @@ class TalkListAPI(ProtectedResource):
 
 
 @ns_talk.route('/year/<year_id>/published', endpoint='talks_published')
-class TalkListAPI(Resource):
+class PublishedTalkListAPI(Resource):
     @ns_talk.expect(parser)
     def get(self, year_id):
         """Get list of talks"""
@@ -123,7 +123,7 @@ class TalkDetailAPI(Resource):
     def patch(self, talk_id):
         """Edit talk"""
         try:
-            user = User.get(email=get_jwt_identity())
+            User.get(email=get_jwt_identity())
         except User.DoesNotExist:
             return {'message': 'User not found'}, 404
         try:
