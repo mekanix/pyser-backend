@@ -1,4 +1,5 @@
 from flask_security import RoleMixin, UserMixin
+
 from peewee import (
     BooleanField,
     CharField,
@@ -21,8 +22,8 @@ class User(Model, UserMixin):
     class Meta:
         table_name = 'users'
 
-    active = BooleanField(default=False)
-    admin = BooleanField(default=False)
+    active = BooleanField()
+    admin = BooleanField()
     confirmed_at = DateTimeField(null=True)
     email = TextField()
     password = TextField()
