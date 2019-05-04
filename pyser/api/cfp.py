@@ -1,11 +1,12 @@
-from flask import current_app, request
 from flask_restplus import Resource
-from .namespaces import ns_cfp
-from .schemas import CfPSchema, TalkSchema
+
+from flask import current_app, request
+
 from ..models.auth import User
 from ..models.event import Event
 from ..utils import send_mail
-
+from .namespaces import ns_cfp
+from .schemas import CfPSchema, TalkSchema
 
 message_format = """
 Details: {referrer}/{talk.id}
@@ -57,10 +58,11 @@ class CfpAPI(Resource):
             cfp.person = User.get(email=cfp.person.email)
         except User.DoesNotExist:
             cfp.person.active = True
+            cfp.person.admin = False
             cfp.person.save()
-        cfp.talk.event = Event.select().where(
-            Event.published,
-        ).order_by(Event.year.desc())[0]
+        allEvents = Event.select().where(Event.published)
+        orderedEvents = allEvents.order_by(Event.year.desc())
+        cfp.talk.event = orderedEvents[0]
         cfp.talk.user = cfp.person
         cfp.talk.save()
         text = message_format.format(
