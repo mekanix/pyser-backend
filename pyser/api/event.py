@@ -1,6 +1,7 @@
-from flask import current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restplus import Resource
+
+from flask import current_app
 
 from ..models.auth import User
 from ..models.event import Event
@@ -15,7 +16,8 @@ from .schemas import EventSchema
 class EventListAPI(Resource):
     @ns_event.expect(parser)
     def get(self):
-        return paginate(Event.select().order_by(Event.year.desc()), EventSchema())
+        query = Event.select().order_by(Event.year.desc())
+        return paginate(query, EventSchema())
 
     @jwt_required
     @ns_event.expect(EventSchema.fields())
@@ -71,6 +73,9 @@ class EventAPI(Resource):
         if errors:
             return errors, 409
         event.year = data.year or event.year
+        published = getattr(data, 'published', None)
+        if published is not None:
+            event.published = published
         event.save()
         response, errors = schema.dump(event)
         if errors:
