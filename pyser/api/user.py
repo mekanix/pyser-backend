@@ -1,7 +1,8 @@
-from flask import current_app
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restplus import Resource
 from flask_security.utils import hash_password
+
+from flask import current_app
 
 from ..models.auth import User
 from .namespaces import ns_user
@@ -64,6 +65,9 @@ class UserAPI(Resource):
         active = getattr(data, 'active', None)
         if active is not None:
             user.active = active
+        admin = getattr(data, 'admin', None)
+        if admin is not None:
+            user.admin = admin
         user.save()
         response, errors = schema.dump(user)
         if errors:
