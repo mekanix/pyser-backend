@@ -16,7 +16,7 @@ class UserListAPI(ProtectedResource):
     @ns_user.expect(parser)
     def get(self):
         """List users"""
-        return paginate(User.select(), UserSchema())
+        return paginate(User.select().order_by(User.id), UserSchema())
 
     @ns_user.expect(UserSchema.fields())
     def post(self):
