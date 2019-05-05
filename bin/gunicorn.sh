@@ -2,6 +2,7 @@
 
 export LC_LANG=en_US.UTF-8
 export LANG=en_US.UTF-8
+export PATH="${PATH}:/usr/local/bin"
 
 BIN_DIR=`dirname $0`
 FLASK_ENV="production"
