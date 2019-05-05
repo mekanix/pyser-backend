@@ -60,9 +60,8 @@ class CfpAPI(Resource):
             cfp.person.active = True
             cfp.person.admin = False
             cfp.person.save()
-        allEvents = Event.select().where(Event.published)
-        orderedEvents = allEvents.order_by(Event.year.desc())
-        cfp.talk.event = orderedEvents[0]
+        events = Event.select().order_by(Event.year.desc())
+        cfp.talk.event = events[0]
         cfp.talk.user = cfp.person
         cfp.talk.save()
         text = message_format.format(
