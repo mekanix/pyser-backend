@@ -6,10 +6,42 @@ from urllib.parse import urlparse, parse_qs
 from ..models.auth import User
 from ..models.event import Event
 from ..models.talk import Talk
+from ..utils import send_mail
 from .namespaces import ns_talk
 from .pagination import paginate, parser
 from .schemas import TalkSchema
 from .resources import ProtectedResource
+
+
+announce_subject = '[PySer] Your talk is {}accepted'
+announce_message = """
+Congratulation,
+
+Your talk titled
+
+"{}"
+
+is accepted. See you at the conference!
+
+Please review the schedule and contact us in the next 3 days if you can't
+present at {}.
+
+Regards,
+PySer conference
+"""
+
+reject_message = """
+Hello,
+
+We're sorry to inform you that your talk
+
+"{}"
+
+is not accepted. We wish you more luck next time!
+
+Regards,
+PySer conference
+"""
 
 
 @ns_talk.route('/year/<year_id>', endpoint='talks')
@@ -102,6 +134,53 @@ class PublishedTalkListAPI(Resource):
             'pages': 1,
             'total': event.talks.count(),
         }
+
+
+@ns_talk.route('/year/<year_id>/announce', endpoint='talks_announce')
+class AnnounceTalkListAPI(ProtectedResource):
+    def post(self, year_id):
+        """Announce the talks"""
+        try:
+            event = Event.get(year=int(year_id))
+        except Event.DoesNotExist:
+            return {'message': 'No such event'}, 404
+        username = current_app.config.get('MAIL_USERNAME', None)
+        password = current_app.config.get('MAIL_PASSWORD', None)
+        host = current_app.config.get('MAIL_SERVER', None)
+        port = current_app.config.get('MAIL_PORT', 25)
+        for talk in event.talks.where(Talk.published):
+            text = announce_message.format(talk.title, talk.start)
+            subject = announce_subject.format('')
+            try:
+                error = send_mail(
+                    'office@pyser.org',
+                    talk.user.email,
+                    subject,
+                    text,
+                    username,
+                    password,
+                    host,
+                    port,
+                )
+            except Exception:
+                pass
+        for talk in event.talks.where(Talk.published == False):
+            text = reject_message.format(talk.title)
+            subject = announce_subject.format('not ')
+            try:
+                error = send_mail(
+                    'office@pyser.org',
+                    talk.user.email,
+                    subject,
+                    text,
+                    username,
+                    password,
+                    host,
+                    port,
+                )
+            except Exception:
+                pass
+        return {'message': 'OK'}
 
 
 @ns_talk.route('/<talk_id>', endpoint='talk')
