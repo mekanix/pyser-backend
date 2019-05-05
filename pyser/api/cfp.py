@@ -8,6 +8,7 @@ from ..utils import send_mail
 from .namespaces import ns_cfp
 from .schemas import CfPSchema, TalkSchema
 
+
 message_format = """
 Details: {referrer}/{talk.id}
 
