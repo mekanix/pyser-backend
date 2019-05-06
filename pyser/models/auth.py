@@ -24,14 +24,15 @@ class User(Model, UserMixin):
 
     active = BooleanField()
     admin = BooleanField()
+    bio = TextField(null=True)
     confirmed_at = DateTimeField(null=True)
     email = TextField()
-    password = TextField()
+    facebook = TextField(null=True)
     firstName = TextField(null=True)
     lastName = TextField(null=True)
-    bio = TextField(null=True)
+    password = TextField()
     twitter = TextField(null=True)
-    facebook = TextField(null=True)
+    volunteer = BooleanField(null=True)
 
 
 class UserRoles(Model):
