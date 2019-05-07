@@ -113,13 +113,10 @@ class UserRolesSchema(BaseSchema):
 
 class UserSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
-    active = fields.Boolean(description='Activate the user', default=True)
-    admin = fields.Boolean(description='Is the user admin?', default=False)
+    active = fields.Boolean(description='Activate the user')
+    admin = fields.Boolean(description='Is the user admin?')
     email = fields.Email(description='Email')
-    password = fields.Str(
-        description='Password',
-        load_only=True
-    )
+    password = fields.Str(description='Password', load_only=True)
     roles = fields.List(fields.Nested(UserRolesSchema), many=True)
     confirmed_at = fields.DateTime(
         description='Time when user was confirmed',
@@ -130,6 +127,7 @@ class UserSchema(BaseSchema):
     bio = fields.Str()
     twitter = fields.Str()
     facebook = fields.Str()
+    volunteer = fields.Boolean(description='Volunteer')
 
     class Meta:
         model = User

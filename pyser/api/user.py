@@ -80,8 +80,17 @@ class UserAPI(Resource):
 
 @ns_user.route('/volunteering', endpoint='volunteering')
 class VolunteeringUserAPI(Resource):
+    @ns_user.expect(parser)
+    def get(self):
+        """List volunteers"""
+        return paginate(
+            User.select().where(User.volunteer).order_by(User.id),
+            UserSchema(),
+        )
+
     @ns_user.expect(UserSchema.fields())
     def post(self):
+        """Create new volunteer"""
         schema = UserSchema()
         user, errors = schema.load(current_app.api.payload)
         if errors:
