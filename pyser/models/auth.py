@@ -26,7 +26,7 @@ class User(Model, UserMixin):
     admin = BooleanField()
     bio = TextField(null=True)
     confirmed_at = DateTimeField(null=True)
-    email = TextField()
+    email = TextField(unique=True)
     facebook = TextField(null=True)
     firstName = TextField(null=True)
     lastName = TextField(null=True)

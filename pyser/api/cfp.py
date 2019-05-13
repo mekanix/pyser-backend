@@ -8,7 +8,6 @@ from ..utils import send_mail
 from .namespaces import ns_cfp
 from .schemas import CfPSchema, TalkSchema
 
-
 message_format = """
 Details: {referrer}/{talk.id}
 
@@ -84,7 +83,7 @@ class CfpAPI(Resource):
             return {'message': 'Unable to send email'}, 409
         text = presenter_message_format.format(cfp.talk.title)
         error = send_mail(
-            'office@pyser.org',
+            to,
             fromAddress,
             subject,
             text,
