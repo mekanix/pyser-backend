@@ -7,10 +7,15 @@ from flask_security.utils import hash_password
 from flask import current_app
 
 from ..models.auth import User
+from ..utils import send_mail
 from .namespaces import ns_user
 from .pagination import paginate, parser
 from .resources import ProtectedResource
 from .schemas import UserSchema
+
+message_format = """
+Thank you for applying as volunteer for Python Serbia conference!
+"""
 
 
 @ns_user.route('', endpoint='users')
@@ -92,11 +97,48 @@ class VolunteeringUserAPI(Resource):
     def post(self):
         """Create new volunteer"""
         schema = UserSchema()
-        user, errors = schema.load(current_app.api.payload)
+        data, errors = schema.load(current_app.api.payload)
         if errors:
             return errors, 409
+        try:
+            user = User.get(email=data.email)
+        except User.DoesNotExist:
+            user = data
+            plaintext = ''.join(choice(ascii_letters) for _ in range(16))
+            user.password = hash_password(plaintext)
         user.volunteer = True
-        plaintext = ''.join(choice(ascii_letters) for _ in range(16))
-        user.password = hash_password(plaintext)
         user.save()
+        username = current_app.config.get('MAIL_USERNAME', None)
+        password = current_app.config.get('MAIL_PASSWORD', None)
+        host = current_app.config.get('MAIL_SERVER', None)
+        port = current_app.config.get('MAIL_PORT', 25)
+        fromAddress = current_app.config.get('MAIL_ADDRESS', None)
+        subject = '[PySer] Volunteering'
+        text = message_format.format()
+        error = send_mail(
+            fromAddress,
+            user.email,
+            subject,
+            text,
+            username,
+            password,
+            host,
+            port,
+        )
+        if error:
+            return {'message': 'Unable to send email'}, 409
+        subject = '[Volunteering]'
+        text = '{} applied as volunteer'.format(user.email)
+        error = send_mail(
+            user.email,
+            fromAddress,
+            subject,
+            text,
+            username,
+            password,
+            host,
+            port,
+        )
+        if error:
+            return {'message': 'Unable to send email'}, 409
         return schema.dump(user)
