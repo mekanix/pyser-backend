@@ -59,6 +59,7 @@ class CfpAPI(Resource):
         except User.DoesNotExist:
             cfp.person.active = True
             cfp.person.admin = False
+            cfp.person.volunteer = False
             cfp.person.save()
         events = Event.select().order_by(Event.year.desc())
         cfp.talk.event = events[0]

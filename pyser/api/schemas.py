@@ -11,6 +11,7 @@ from ..models.auth import Role, User, UserRoles
 from ..models.blog import Blog
 from ..models.cfs import CfS
 from ..models.cfp import CfP
+from ..models.email import EmailModel
 from ..models.event import Event
 from ..models.gallery import GalleryAlbum, GalleryFile
 from ..models.hall import Hall
@@ -260,10 +261,22 @@ class CfPSchema(BaseSchema):
         name = 'CfP'
 
 
+class EmailSchema(BaseSchema):
+    fromAddress = fields.Str()
+    to = fields.Str()
+    subject = fields.Str()
+    message = fields.Str()
+
+    class Meta:
+        model = EmailModel
+        name = 'Email'
+
+
 schemas = [
     BlogSchema,
     CfPSchema,
     CfSSchema,
+    EmailSchema,
     EventSchema,
     GalleryAlbumSchema,
     GalleryFileSchema,

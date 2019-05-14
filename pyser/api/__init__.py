@@ -55,6 +55,7 @@ def create_api(app):
         blog,
         cfp,
         cfs,
+        email,
         event,
         gallery,
         hall,
