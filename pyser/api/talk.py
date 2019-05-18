@@ -12,7 +12,6 @@ from .pagination import paginate, parser
 from .schemas import TalkSchema
 from .resources import ProtectedResource
 
-
 announce_subject = '[PySer] Your talk is {}accepted'
 announce_message = """
 Congratulation,
@@ -54,7 +53,7 @@ class TalkListAPI(Resource):
         except Event.DoesNotExist:
             return {'message': 'No such event'}, 404
         schema = TalkSchema()
-        data, errors = schema.dump(event.talks, many=True)
+        data, errors = schema.dump(event.talks.order_by(Talk.start), many=True)
         if errors:
             return errors, 409
         return {
@@ -111,7 +110,8 @@ class UserTalkListAPI(ProtectedResource):
             event = Event.get(year=int(year_id))
         except Event.DoesNotExist:
             return {'message': 'No such event'}, 404
-        query = event.talks.join(User).where(Talk.user == user)
+        allTalks = event.talks.join(User).where(Talk.user == user)
+        query = allTalks.order_by(Talk.start)
         return paginate(query, TalkSchema())
 
 
@@ -124,7 +124,7 @@ class PublishedTalkListAPI(Resource):
             event = Event.get(year=int(year_id))
         except Event.DoesNotExist:
             return {'message': 'No such event'}, 404
-        query = event.talks.where(Talk.published)
+        query = event.talks.where(Talk.published).order_by(Talk.start)
         schema = TalkSchema()
         data, errors = schema.dump(query, many=True)
         if errors:
