@@ -40,3 +40,9 @@ class UserRoles(Model):
     name = property(lambda self: self.role.name)
     role = ForeignKeyField(Role, related_name='users')
     user = ForeignKeyField(User, related_name='roles')
+
+
+class VolunteerCountModel(object):
+    def __init__(self, count, max):
+        self.count = count
+        self.max = max

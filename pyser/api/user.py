@@ -11,7 +11,7 @@ from ..utils import send_mail
 from .namespaces import ns_user
 from .pagination import paginate, parser
 from .resources import ProtectedResource
-from .schemas import UserSchema
+from .schemas import UserSchema, VolunteerCountSchema
 
 message_format = """
 Thank you for applying as volunteer for Python Serbia conference!
@@ -85,9 +85,16 @@ class UserAPI(Resource):
 
 @ns_user.route('/volunteering', endpoint='volunteering')
 class VolunteeringUserAPI(Resource):
+    @jwt_required
     @ns_user.expect(parser)
     def get(self):
         """List volunteers"""
+        try:
+            admin_user = User.get(email=get_jwt_identity())
+            if not admin_user.admin:
+                return {'message': 'Not an admin user'}, 403
+        except User.DoesNotExist:
+            return {'message': 'User not found'}, 404
         return paginate(
             User.select().where(User.volunteer).order_by(User.id),
             UserSchema(),
@@ -98,6 +105,9 @@ class VolunteeringUserAPI(Resource):
         """Create new volunteer"""
         schema = UserSchema()
         data, errors = schema.load(current_app.api.payload)
+        volunteers = User.select().where(User.volunteer)
+        volunteerCount = volunteers.count()
+        print(volunteerCount, volunteerCount >= 10)
         if errors:
             return errors, 409
         try:
@@ -142,3 +152,20 @@ class VolunteeringUserAPI(Resource):
         if error:
             return {'message': 'Unable to send email'}, 409
         return schema.dump(user)
+
+
+@ns_user.route('/volunteering/count', endpoint='volunteering_count')
+class VolunteerCountAPI(Resource):
+    def get(self):
+        """Get volunteer count"""
+        volunteers = User.select().where(User.volunteer)
+        volunteerCount = volunteers.count()
+        volunteerMax = current_app.config.get('VOLUNTEER_COUNT', 15)
+        schema = VolunteerCountSchema()
+        response, errors = schema.dump({
+            'count': volunteerCount,
+            'max': volunteerMax,
+        })
+        if errors:
+            return errors, 409
+        return response

@@ -25,6 +25,7 @@ class Config:
     #  JWT_REFRESH_TOKEN_EXPIRES = timedelta(seconds=10)
     MEDIA_URL = '/media'
     MEDIA_PATH = 'media'
+    VOLUNTEER_COUNT = 15
     DATABASE = {
         'name': 'database.db',
         'engine': 'SqliteDatabase',
