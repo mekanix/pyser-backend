@@ -7,7 +7,7 @@ from marshmallow import Schema, fields, missing, post_load, pre_dump, pre_load
 from marshmallow.exceptions import ValidationError
 
 from ..date import datetime_format, peewee_datetime_format
-from ..models.auth import Role, User, UserRoles
+from ..models.auth import Role, User, UserRoles, VolunteerCountModel
 from ..models.blog import Blog
 from ..models.cfs import CfS
 from ..models.cfp import CfP
@@ -272,6 +272,15 @@ class EmailSchema(BaseSchema):
         name = 'Email'
 
 
+class VolunteerCountSchema(BaseSchema):
+    count = fields.Int()
+    max = fields.Int()
+
+    class Meta:
+        model = VolunteerCountModel
+        name = 'VolunteerCount'
+
+
 schemas = [
     BlogSchema,
     CfPSchema,
@@ -286,4 +295,5 @@ schemas = [
     TokenSchema,
     UserRolesSchema,
     UserSchema,
+    VolunteerCountSchema,
 ]
