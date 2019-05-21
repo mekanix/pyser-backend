@@ -59,6 +59,7 @@ def create_api(app):
         event,
         gallery,
         hall,
+        landing,
         me,
         talk,
         user,

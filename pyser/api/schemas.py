@@ -9,8 +9,8 @@ from marshmallow.exceptions import ValidationError
 from ..date import datetime_format, peewee_datetime_format
 from ..models.auth import Role, User, UserRoles, VolunteerCountModel
 from ..models.blog import Blog
-from ..models.cfs import CfS
 from ..models.cfp import CfP
+from ..models.cfs import CfS
 from ..models.email import EmailModel
 from ..models.event import Event
 from ..models.gallery import GalleryAlbum, GalleryFile
@@ -262,7 +262,7 @@ class CfPSchema(BaseSchema):
 
 
 class EmailSchema(BaseSchema):
-    fromAddress = fields.Str()
+    fromAddress = fields.Email()
     to = fields.Str()
     subject = fields.Str()
     message = fields.Str()

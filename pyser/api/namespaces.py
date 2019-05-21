@@ -8,6 +8,7 @@ ns_email = Namespace('email', description='Email operations')
 ns_event = Namespace('event', description='Event operations')
 ns_gallery = Namespace('gallery', description='Gallery operations')
 ns_hall = Namespace('hall', description='Hall operations')
+ns_landing = Namespace('landing', description='Landing operations')
 ns_me = Namespace('me', description='Me operations')
 ns_talk = Namespace('talk', description='Task operations')
 ns_user = Namespace('users', description='User operations')
@@ -21,6 +22,7 @@ namespaces = [
     ns_event,
     ns_gallery,
     ns_hall,
+    ns_landing,
     ns_me,
     ns_talk,
     ns_user,

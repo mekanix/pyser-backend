@@ -1,14 +1,13 @@
+from flask import current_app
 from flask_jwt_extended import get_jwt_identity
 
-from flask import current_app
-
-from .namespaces import ns_email
-from .schemas import EmailSchema
-from .resources import ProtectedResource
 from ..models.auth import User
 from ..models.event import Event
 from ..models.talk import Talk
 from ..utils import send_mail
+from .namespaces import ns_email
+from .resources import ProtectedResource
+from .schemas import EmailSchema
 
 
 @ns_email.route('', endpoint='email')
@@ -56,7 +55,7 @@ class EmailAPI(ProtectedResource):
             return {'message': 'Invalid "fromAddress" parameter'}, 409
         for user in query:
             try:
-                error = send_mail(
+                send_mail(
                     fromAddress,
                     user.email,
                     email.subject,
@@ -66,6 +65,6 @@ class EmailAPI(ProtectedResource):
                     host,
                     port,
                 )
-            except Exception as e:
+            except Exception:
                 pass
         return response
