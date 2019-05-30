@@ -262,7 +262,7 @@ class CfPSchema(BaseSchema):
 
 
 class EmailSchema(BaseSchema):
-    fromAddress = fields.Email()
+    fromAddress = fields.Str()
     to = fields.Str()
     subject = fields.Str()
     message = fields.Str()
