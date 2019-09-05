@@ -1,6 +1,6 @@
 import factory
 from flask_security.utils import hash_password
-from pyser.models.auth import Role, User
+from application.models.auth import User, Role
 
 
 class UserFactory(factory.Factory):

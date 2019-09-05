@@ -1,5 +1,4 @@
 from flask_security import RoleMixin, UserMixin
-
 from peewee import (
     BooleanField,
     CharField,
@@ -22,17 +21,11 @@ class User(Model, UserMixin):
     class Meta:
         table_name = 'users'
 
-    active = BooleanField()
-    admin = BooleanField()
-    bio = TextField(null=True)
+    active = BooleanField(default=True)
+    admin = BooleanField(default=False)
     confirmed_at = DateTimeField(null=True)
-    email = TextField(unique=True)
-    facebook = TextField(null=True)
-    firstName = TextField(null=True)
-    lastName = TextField(null=True)
+    email = TextField()
     password = TextField()
-    twitter = TextField(null=True)
-    volunteer = BooleanField(null=True)
 
 
 class UserRoles(Model):
@@ -40,9 +33,3 @@ class UserRoles(Model):
     name = property(lambda self: self.role.name)
     role = ForeignKeyField(Role, related_name='users')
     user = ForeignKeyField(User, related_name='roles')
-
-
-class VolunteerCountModel(object):
-    def __init__(self, count, max):
-        self.count = count
-        self.max = max

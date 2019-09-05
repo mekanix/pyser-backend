@@ -1,7 +1,8 @@
+CBSD_WORKDIR != sysrc -n cbsd_workdir
 SERVICE = pyserback
 REGGAE_PATH :=/usr/local/share/reggae
 
-.if exists(provisioners.mk)
-.include <provisioners.mk>
-.endif
+shell: up
+	@sudo cbsd jexec user=devel jname=${SERVICE} /usr/src/bin/shell.sh
+
 .include <${REGGAE_PATH}/mk/service.mk>
