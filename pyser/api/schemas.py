@@ -40,7 +40,7 @@ def marshmallowToField(field, required=None):
         subtype = field.nested.fields(required=required)
     elif typeOfField == fields.List:
         field_type = rest_fields.List
-        subtype = marshmallowToField(field.container, required)
+        subtype = marshmallowToField(field.inner, required)
     else:
         raise ValueError('Unknown field of type {}'.format(typeOfField))
 
