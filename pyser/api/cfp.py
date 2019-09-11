@@ -1,12 +1,12 @@
-from flask_restplus import Resource
-
 from flask import current_app, request
+from flask.views import MethodView
+from flask_rest_api import Blueprint
 
 from ..models.auth import User
+from ..models.cfp import CfP
 from ..models.event import Event
-from ..utils import send_mail
-from .namespaces import ns_cfp
-from .schemas import CfPSchema, TalkSchema
+#  from ..utils import send_mail
+from ..schemas.cfp import CfPSchema
 
 message_format = """
 Details: {referrer}/{talk.id}
@@ -36,17 +36,16 @@ is in review.
 """
 
 subject_format = "[CfP] {}"
+blueprint = Blueprint('cfp', 'cfp')
 
 
-@ns_cfp.route('', endpoint='cfp')
-class CfpAPI(Resource):
-    @ns_cfp.response(409, 'Invalid data')
-    def post(self):
-        """Authenticates and generates a token."""
-        schema = CfPSchema()
-        cfp, errors = schema.load(current_app.api.payload)
-        if errors:
-            return errors, 409
+@blueprint.route('', endpoint='cfp')
+class CfpAPI(MethodView):
+    @blueprint.arguments(CfPSchema)
+    @blueprint.response(CfPSchema)
+    def post(self, args):
+        """Submit talk proposal"""
+        cfp = CfP(**args)
         username = current_app.config.get('MAIL_USERNAME', None)
         password = current_app.config.get('MAIL_PASSWORD', None)
         host = current_app.config.get('MAIL_SERVER', None)
@@ -70,33 +69,29 @@ class CfpAPI(Resource):
             person=cfp.person,
             referrer=request.referrer,
         )
-        error = send_mail(
-            fromAddress,
-            to,
-            subject,
-            text,
-            username,
-            password,
-            host,
-            port,
-        )
-        if error:
-            return {'message': 'Unable to send email'}, 409
+        #  error = send_mail(
+        #  fromAddress,
+        #  to,
+        #  subject,
+        #  text,
+        #  username,
+        #  password,
+        #  host,
+        #  port,
+        #  )
+        #  if error:
+        #  return {'message': 'Unable to send email'}, 409
         text = presenter_message_format.format(cfp.talk.title)
-        error = send_mail(
-            to,
-            fromAddress,
-            subject,
-            text,
-            username,
-            password,
-            host,
-            port,
-        )
-        if error:
-            return {'message': 'Unable to send email'}, 409
-        schema = TalkSchema()
-        response, errors = schema.dump(cfp.talk)
-        if errors:
-            return errors, 409
-        return response
+        #  error = send_mail(
+        #  to,
+        #  fromAddress,
+        #  subject,
+        #  text,
+        #  username,
+        #  password,
+        #  host,
+        #  port,
+        #  )
+        #  if error:
+        #  return {'message': 'Unable to send email'}, 409
+        return cfp

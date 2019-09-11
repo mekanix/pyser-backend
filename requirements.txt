@@ -1,8 +1,7 @@
 bcrypt
 flask-collect
 flask-jwt-extended
-flask-mail
-flask-restplus
+flask-rest-api
 flask-security
 gunicorn
 marshmallow

@@ -12,10 +12,6 @@ build
 cbsd.conf
 coverage.xml
 database.db
-local_config.py
-media/*
-!media/.keep
-pyser/static
 site.retry
 test.db
 vars.mk

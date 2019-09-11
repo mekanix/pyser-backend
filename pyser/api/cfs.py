@@ -1,45 +1,43 @@
 from flask import current_app, request
+from flask.views import MethodView
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_mail import Message
-from flask_restplus import Resource
+from flask_rest_api import Blueprint, abort
 from peewee import fn
 
 from ..models.auth import User
 from ..models.cfs import CfS
 from ..models.event import Event
-from .namespaces import ns_cfs
-from .pagination import paginate, parser
-from .schemas import CfSSchema
+from ..schemas.cfs import CfSSchema
+from ..schemas.paging import PageInSchema, PageOutSchema, paginate
+
+blueprint = Blueprint('cfs', 'cfs')
 
 
-@ns_cfs.route('/<year>', endpoint='cfs_list')
-class cfsAPI(Resource):
-    @ns_cfs.expect(parser)
-    def get(self, year):
+@blueprint.route('/<year>', endpoint='cfs_list')
+class CfSAPI(MethodView):
+    @blueprint.arguments(PageInSchema(), location='headers')
+    @blueprint.response(PageOutSchema(CfSSchema))
+    def get(self, pagination, year):
         """Get list of sponsors"""
         try:
             event = Event.get(year=int(year))
         except Event.DoesNotExist:
-            return {'message': 'No such event'}, 404
-        return paginate(event.cfs, CfSSchema())
+            abort(404, message='Event not found')
+        return paginate(event.cfs, pagination)
 
 
-@ns_cfs.route('', endpoint='cfs_create')
-class CfSCreateAPI(Resource):
-    @ns_cfs.expect(CfSSchema.fields())
-    def post(self):
+@blueprint.route('', endpoint='cfs_create')
+class CfSCreateAPI(MethodView):
+    @blueprint.arguments(CfSSchema)
+    @blueprint.response(CfSSchema)
+    def post(self, args):
         """Create new CfS"""
-        schema = CfSSchema()
-        cfs, errors = schema.load(current_app.api.payload)
-        if errors:
-            return errors, 409
+        cfs = CfS(**args)
         year = Event.select(fn.Max(Event.year))
         event = Event.get(year=year)
         cfs.event = event
         cfs.save()
-        response, errors = schema.dump(cfs)
-        if errors:
-            return errors, 409
         msg = Message(
             '[PySer CfS] {}'.format(cfs.organization),
             sender=cfs.email,
@@ -49,67 +47,55 @@ class CfSCreateAPI(Resource):
         msg.body = cfs.message
         msg.body += '\nCheck out {}/{}'.format(referer, cfs.id)
         current_app.mail.send(msg)
-        return response
+        return cfs
 
 
-@ns_cfs.route('/detail/<cfs_id>', endpoint='cfs')
-class CfSDetailAPI(Resource):
+@blueprint.route('/detail/<cfs_id>', endpoint='cfs')
+class CfSDetailAPI(MethodView):
+    @blueprint.response(CfSSchema)
     def get(self, cfs_id):
         """Get cfs details"""
         try:
             cfs = CfS.get(id=cfs_id)
         except CfS.DoesNotExist:
-            return {'message': 'No such sponsor'}, 404
-        schema = CfSSchema()
-        response, errors = schema.dump(cfs)
-        if errors:
-            return errors, 409
-        return response
+            abort(404, message='CfS not found')
+        return cfs
 
     @jwt_required
-    @ns_cfs.expect(CfSSchema.fields())
-    def patch(self, cfs_id):
+    @blueprint.arguments(CfSSchema(partial=True))
+    @blueprint.response(CfSSchema)
+    def patch(self, args, cfs_id):
         """Edit sponsor"""
         try:
             user = User.get(email=get_jwt_identity())
         except User.DoesNotExist:
-            return {'message': 'User not found'}, 404
+            abort(404, message='User not found')
         try:
             cfs = CfS.get(id=cfs_id)
         except CfS.DoesNotExist:
-            return {'message': 'No such sponsor'}, 404
-        schema = CfSSchema()
-        data, errors = schema.load(current_app.api.payload)
-        if errors:
-            return errors, 409
+            abort(404, message='No such sponsor')
         try:
-            cfs_user = data.user
+            cfs_user = args.get('user', None)
             try:
                 cfs.user = User.get(email=cfs_user.email)
             except User.DoesNotExist:
-                return {'message': 'User not found'}, 404
+                abort(404, message='User not found')
         except User.DoesNotExist:
             cfs.user = user
         cfs.save()
-        response, errors = schema.dump(cfs)
-        if errors:
-            return errors, 409
-        return response
+        return cfs
 
     @jwt_required
+    @blueprint.response(CfSSchema)
     def delete(self, cfs_id):
         """Delete sponsor"""
         try:
             User.get(email=get_jwt_identity())
         except User.DoesNotExist:
-            return {'message': 'User not found'}, 404
+            abort(404, message='User not found')
         try:
             cfs = CfS.get(id=cfs_id)
         except CfS.DoesNotExist:
-            return {'message': 'No such sponsor'}, 404
-        schema = CfSSchema()
-        response, errors = schema.dump(cfs)
-        if errors:
-            return errors, 409
+            abort(404, message='No such sponsor')
         cfs.delete_instance()
-        return response
+        return cfs

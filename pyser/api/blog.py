@@ -1,36 +1,37 @@
 from datetime import datetime
 
-from flask import current_app
+from flask.views import MethodView
 from flask_jwt_extended import get_jwt_identity, jwt_optional, jwt_required
-from flask_restplus import Resource
+from flask_rest_api import Blueprint
 
 from ..models.auth import User
 from ..models.blog import Blog
-from .namespaces import ns_blog
-from .pagination import paginate, parser
-from .schemas import BlogSchema
+from ..schemas.blog import BlogSchema
+from ..schemas.paging import PageInSchema, PageOutSchema, paginate
+
+blueprint = Blueprint('blog', 'blog')
 
 
-@ns_blog.route('', endpoint='blogs')
-class BlogListAPI(Resource):
-    @ns_blog.expect(parser)
+@blueprint.route('', endpoint='blogs')
+class BlogListAPI(MethodView):
     @jwt_optional
-    def get(self):
-        """List blog"""
+    @blueprint.arguments(PageInSchema(), location='headers')
+    @blueprint.response(PageOutSchema(BlogSchema))
+    def get(self, pagination):
+        """List blog posts"""
         email = get_jwt_identity()
         if email is None:
             query = Blog.select().where(Blog.published)
         else:
             query = Blog.select()
-        return paginate(query, BlogSchema())
+        return paginate(query, pagination)
 
-    @ns_blog.expect(BlogSchema.fields())
     @jwt_required
-    def post(self):
-        schema = BlogSchema()
-        blog, errors = schema.load(current_app.api.payload)
-        if errors:
-            return errors, 409
+    @blueprint.arguments(BlogSchema)
+    @blueprint.response(BlogSchema)
+    def post(self, args):
+        """Create blog post"""
+        blog = Blog(**args)
         blog.date = datetime.utcnow()
         email = get_jwt_identity()
         try:
@@ -48,14 +49,14 @@ class BlogListAPI(Resource):
         except Blog.DoesNotExist:
             blog.author = user
             blog.save()
-        return schema.dump(blog)
+        return blog
 
 
-@ns_blog.route('/<year>/<month>/<day>/<slug>', endpoint='blog')
-@ns_blog.response(404, 'Blog not found')
-class BlogAPI(Resource):
+@blueprint.route('/<year>/<month>/<day>/<slug>', endpoint='blog')
+class BlogAPI(MethodView):
+    @blueprint.response(BlogSchema)
     def get(self, year, month, day, slug):
-        """Get blog details"""
+        """Get blog post details"""
         try:
             blog = Blog.find(year, month, day, slug)
         except Blog.DoesNotExist:
@@ -68,39 +69,31 @@ class BlogAPI(Resource):
             return errors, 409
         return response
 
-    @ns_blog.expect(BlogSchema.fields(required=False))
     @jwt_required
-    def patch(self, year, month, day, slug):
+    @blueprint.arguments(BlogSchema(partial=True))
+    @blueprint.response(BlogSchema)
+    def patch(self, args, year, month, day, slug):
+        """Edit blog post details"""
         try:
             blog = Blog.find(year, month, day, slug)
         except Blog.DoesNotExist:
             return {'message': 'No such blog'}, 404
         except ValueError:
             return {'message': 'Multiple blogs found'}, 409
-        schema = BlogSchema()
-        data, errors = schema.load(current_app.api.payload)
-        if errors:
-            return errors, 409
-        blog.title = data.title or blog.title
-        blog.content = data.content or blog.content
-        published = getattr(data, 'published', None)
-        if published is not None:
-            blog.published = published
+        for field in args:
+            setattr(blog, field, args[field])
         blog.save()
-        return schema.dump(blog)
+        return blog
 
-    @ns_blog.expect(BlogSchema.fields())
     @jwt_required
+    @blueprint.response(BlogSchema)
     def delete(self, year, month, day, slug):
+        """Delete blog post"""
         try:
             blog = Blog.find(year, month, day, slug)
         except Blog.DoesNotExist:
             return {'message': 'No such blog'}, 404
         except ValueError:
             return {'message': 'Multiple blogs found'}, 409
-        schema = BlogSchema()
-        response, errors = schema.dump(blog)
-        if errors:
-            return errors, 409
         blog.delete_instance()
-        return schema.dump(blog)
+        return blog

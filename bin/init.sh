@@ -5,7 +5,6 @@ export OFFLINE=${OFFLINE:=no}
 BIN_DIR=`dirname $0`
 . ${BIN_DIR}/common.sh
 
-
 if [ "${OFFLINE}" = "yes" ]; then
   setup no
 else
@@ -14,5 +13,3 @@ fi
 
 
 flask users create -a --password Sekrit admin@example.com
-flask users admin admin@example.com
-flask events create `date '+%Y'`

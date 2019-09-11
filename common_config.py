@@ -1,16 +1,9 @@
 #  from datetime import timedelta
-import os
 
 SECRET_KEY = 'iQfPvB6sZaNHqVFI5CJa9rM1xOEVHKIM0LwifT04yLsPlZhSSvaDuZXOgJFSpJVq'
 
 
 class Config:
-    MAIL_SERVER = 'mail.tilda.center'
-    MAIL_PORT = '587'
-    MAIL_USE_TLS = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_ADDRESS = 'office@pyser.org'
     DEBUG = False
     SECURITY_PASSWORD_SALT = 'tilda'
     SECRET_KEY = SECRET_KEY
@@ -21,11 +14,13 @@ class Config:
     JWT_REFRESH_COOKIE_PATH = '/api/v0/auth/refresh'
     JWT_SESSION_COOKIE = False
     JWT_COOKIE_SECURE = True
-    #  JWT_ACCESS_TOKEN_EXPIRES = timedelta(seconds=3)
+    #  JWT_ACCESS_TOKEN_EXPIRES = timedelta(seconds=1)
     #  JWT_REFRESH_TOKEN_EXPIRES = timedelta(seconds=10)
-    MEDIA_URL = '/media'
-    MEDIA_PATH = 'media'
-    VOLUNTEER_COUNT = 15
+    OPENAPI_URL_PREFIX = '/doc'
+    OPENAPI_REDOC_PATH = '/redoc'
+    OPENAPI_SWAGGER_UI_PATH = '/swaggerui'
+    OPENAPI_SWAGGER_UI_URL = '/static/swaggerui/'
+    OPENAPI_VERSION = '2.0.0'
     DATABASE = {
         'name': 'database.db',
         'engine': 'SqliteDatabase',

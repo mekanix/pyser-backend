@@ -1,37 +1,36 @@
 from flask import current_app
 from flask_jwt_extended import get_jwt_identity
+from flask_rest_api import Blueprint, abort
 
 from ..models.auth import User
+from ..models.email import Email
 from ..models.event import Event
 from ..models.talk import Talk
-from ..utils import send_mail
-from .namespaces import ns_email
-from .resources import ProtectedResource
-from .schemas import EmailSchema
+from ..schemas.email import EmailSchema
+from .methodviews import ProtectedMethodView
+
+blueprint = Blueprint('email', 'email')
 
 
-@ns_email.route('', endpoint='email')
-class EmailAPI(ProtectedResource):
-    def post(self):
+@blueprint.route('', endpoint='email')
+class EmailAPI(ProtectedMethodView):
+    @blueprint.arguments(EmailSchema)
+    @blueprint.response(EmailSchema)
+    def post(self, args):
+        """Send email"""
         email = get_jwt_identity()
         try:
             adminUser = User.get(email=email)
         except User.DoesNotExist:
             return {'message': 'No such user'}, 404
         if not adminUser.admin:
-            return {'message': 'Only admins can send messages'}, 409
-        schema = EmailSchema()
-        email, errors = schema.load(current_app.api.payload)
-        if errors:
-            return errors, 409
-        response, errors = schema.dump(email)
-        if errors:
-            return errors, 409
+            abort(403, message='Only admins can send messages')
         username = current_app.config.get('MAIL_USERNAME', None)
         password = current_app.config.get('MAIL_PASSWORD', None)
         host = current_app.config.get('MAIL_SERVER', None)
         port = current_app.config.get('MAIL_PORT', 25)
         baseQuery = User.select()
+        email = Email(**args)
         if email.to == 'all':
             query = baseQuery
         elif email.to == 'admins':
@@ -67,4 +66,4 @@ class EmailAPI(ProtectedResource):
                 )
             except Exception:
                 pass
-        return response
+        return email

@@ -1,171 +1,65 @@
-from string import ascii_letters
-from random import choice
-from flask_jwt_extended import get_jwt_identity, jwt_required
-from flask_restplus import Resource
+from flask_rest_api import Blueprint, abort
 from flask_security.utils import hash_password
 
-from flask import current_app
-
 from ..models.auth import User
-from ..utils import send_mail
-from .namespaces import ns_user
-from .pagination import paginate, parser
-from .resources import ProtectedResource
-from .schemas import UserSchema, VolunteerCountSchema
+from ..schemas.auth import UserSchema
+from ..schemas.paging import PageInSchema, PageOutSchema, paginate
+from .methodviews import ProtectedMethodView
 
-message_format = """
-Thank you for applying as volunteer for Python Serbia conference!
-"""
+blueprint = Blueprint('user', 'user')
 
 
-@ns_user.route('', endpoint='users')
-class UserListAPI(ProtectedResource):
-    @ns_user.expect(parser)
-    def get(self):
+@blueprint.route('/', endpoint='users')
+class UserListAPI(ProtectedMethodView):
+    @blueprint.arguments(PageInSchema(), location='headers')
+    @blueprint.response(PageOutSchema(UserSchema))
+    def get(self, pagination):
         """List users"""
-        return paginate(User.select().order_by(User.id), UserSchema())
+        return paginate(User.select(), pagination)
 
-    @ns_user.expect(UserSchema.fields())
-    def post(self):
+    @blueprint.arguments(UserSchema)
+    @blueprint.response(UserSchema)
+    def post(self, args):
         """Create user"""
-        schema = UserSchema()
-        user, errors = schema.load(current_app.api.payload)
-        if errors:
-            return errors, 409
-        user.password = hash_password(user.password)
+        user = User(**args)
+        if user.password:
+            user.password = hash_password(user.password)
         user.save()
-        return schema.dump(user)
+        return user
 
 
-@ns_user.route('/<user_id>', endpoint='user')
-@ns_user.response(404, 'User not found')
-class UserAPI(Resource):
+@blueprint.route('/<user_id>', endpoint='user')
+class UserAPI(ProtectedMethodView):
+    @blueprint.response(UserSchema)
     def get(self, user_id):
         """Get user details"""
         try:
             user = User.get(id=user_id)
         except User.DoesNotExist:
-            return {'message': 'User not found'}, 404
-        schema = UserSchema()
-        response, errors = schema.dump(user)
-        if errors:
-            return errors, 409
-        return response
+            abort(404, message='User not found')
+        return user
 
-    @jwt_required
-    @ns_user.expect(UserSchema.fields())
-    def patch(self, user_id):
-        """Edit user"""
-        try:
-            admin_user = User.get(email=get_jwt_identity())
-            if not admin_user.admin:
-                return {'message': 'Not an admin user'}, 403
-        except User.DoesNotExist:
-            return {'message': 'User not found'}, 404
+    @blueprint.arguments(UserSchema(partial=True))
+    @blueprint.response(UserSchema)
+    def patch(self, args, user_id):
+        """Edit user details"""
         try:
             user = User.get(id=user_id)
         except User.DoesNotExist:
-            return {'message': 'No such talk'}, 404
-        schema = UserSchema()
-        data, errors = schema.load(current_app.api.payload)
-        if errors:
-            return errors, 409
-        active = getattr(data, 'active', None)
-        if active is not None:
-            user.active = active
-        admin = getattr(data, 'admin', None)
-        if admin is not None:
-            user.admin = admin
+            abort(404, message='User not found')
+        for field in args:
+            setattr(user, field, args[field])
+        if 'password' in args:
+            user.password = hash_password(user.password)
         user.save()
-        response, errors = schema.dump(user)
-        if errors:
-            return errors, 409
-        return response
+        return user
 
-
-@ns_user.route('/volunteering', endpoint='volunteering')
-class VolunteeringUserAPI(Resource):
-    @jwt_required
-    @ns_user.expect(parser)
-    def get(self):
-        """List volunteers"""
+    @blueprint.response(UserSchema)
+    def delete(self, user_id):
+        """Delete user"""
         try:
-            admin_user = User.get(email=get_jwt_identity())
-            if not admin_user.admin:
-                return {'message': 'Not an admin user'}, 403
+            user = User.get(id=user_id)
         except User.DoesNotExist:
-            return {'message': 'User not found'}, 404
-        return paginate(
-            User.select().where(User.volunteer).order_by(User.id),
-            UserSchema(),
-        )
-
-    @ns_user.expect(UserSchema.fields())
-    def post(self):
-        """Create new volunteer"""
-        schema = UserSchema()
-        data, errors = schema.load(current_app.api.payload)
-        volunteers = User.select().where(User.volunteer)
-        volunteerCount = volunteers.count()
-        print(volunteerCount, volunteerCount >= 10)
-        if errors:
-            return errors, 409
-        try:
-            user = User.get(email=data.email)
-        except User.DoesNotExist:
-            user = data
-            plaintext = ''.join(choice(ascii_letters) for _ in range(16))
-            user.password = hash_password(plaintext)
-        user.volunteer = True
-        user.save()
-        username = current_app.config.get('MAIL_USERNAME', None)
-        password = current_app.config.get('MAIL_PASSWORD', None)
-        host = current_app.config.get('MAIL_SERVER', None)
-        port = current_app.config.get('MAIL_PORT', 25)
-        fromAddress = current_app.config.get('MAIL_ADDRESS', None)
-        subject = '[PySer] Volunteering'
-        text = message_format.format()
-        error = send_mail(
-            fromAddress,
-            user.email,
-            subject,
-            text,
-            username,
-            password,
-            host,
-            port,
-        )
-        if error:
-            return {'message': 'Unable to send email'}, 409
-        subject = '[Volunteering]'
-        text = '{} applied as volunteer'.format(user.email)
-        error = send_mail(
-            user.email,
-            fromAddress,
-            subject,
-            text,
-            username,
-            password,
-            host,
-            port,
-        )
-        if error:
-            return {'message': 'Unable to send email'}, 409
-        return schema.dump(user)
-
-
-@ns_user.route('/volunteering/count', endpoint='volunteering_count')
-class VolunteerCountAPI(Resource):
-    def get(self):
-        """Get volunteer count"""
-        volunteers = User.select().where(User.volunteer)
-        volunteerCount = volunteers.count()
-        volunteerMax = current_app.config.get('VOLUNTEER_COUNT', 15)
-        schema = VolunteerCountSchema()
-        response, errors = schema.dump({
-            'count': volunteerCount,
-            'max': volunteerMax,
-        })
-        if errors:
-            return errors, 409
-        return response
+            abort(404, message='User not found')
+        user.delete_instance()
+        return user
