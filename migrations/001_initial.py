@@ -15,11 +15,16 @@ def migrate(migrator, database, fake=False, **kwargs):
     @migrator.create_model
     class User(pw.Model):
         id = pw.AutoField()
-        active = pw.BooleanField(constraints=[SQL("DEFAULT True")])
+        active = pw.BooleanField(constraints=[SQL("DEFAULT False")])
         admin = pw.BooleanField(constraints=[SQL("DEFAULT False")])
         confirmed_at = pw.DateTimeField(null=True)
         email = pw.TextField()
         password = pw.TextField()
+        firstName = pw.TextField(null=True)
+        lastName = pw.TextField(null=True)
+        bio = pw.TextField(null=True)
+        twitter = pw.TextField(null=True)
+        facebook = pw.TextField(null=True)
 
         class Meta:
             table_name = "users"
@@ -140,7 +145,6 @@ def migrate(migrator, database, fake=False, **kwargs):
             field='id',
             model=migrator.orm['users']
         )
-        video = pw.TextField(null=True)
 
         class Meta:
             table_name = "talk"

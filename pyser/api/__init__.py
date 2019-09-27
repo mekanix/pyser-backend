@@ -45,6 +45,7 @@ def create_api(app):
             hall,
             landing,
             me,
+            talk,
             user,
         ],
     )

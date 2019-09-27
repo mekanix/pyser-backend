@@ -28,9 +28,6 @@ def PageOutSchema(schema):
     class PS(BaseSchema):
         pages = fields.Integer()
         total = fields.Integer()
-        data = fields.List(
-            fields.Nested(schema),
-            many=True,
-        )
+        data = fields.List(fields.Nested(schema))
 
     return PS

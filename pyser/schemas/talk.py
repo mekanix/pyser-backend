@@ -3,7 +3,7 @@ from copy import copy
 
 from marshmallow import fields, pre_dump
 
-from ..date import datetime_format, peewee_datetime_format
+from ..date import datetime_format
 from .auth import UserSchema
 from .base import BaseSchema
 from .event import EventSchema
@@ -24,14 +24,10 @@ class TalkSchema(BaseSchema):
     video = fields.String(description='Talk video')
 
     @pre_dump
-    def convert_date(self, data):
+    def convert_date(self, data, many):
+        start = getattr(data, 'start', None)
         duration = getattr(data, 'duration', None)
         newdata = copy(data)
-        if isinstance(data.start, str):
-            newdata.start = datetime.datetime.strptime(
-                data.start,
-                peewee_datetime_format
-            )
-        if None not in [duration, newdata.start]:
-            newdata.end = newdata.start + datetime.timedelta(minutes=duration)
+        if None not in [duration, start]:
+            newdata.end = start + datetime.timedelta(minutes=duration)
         return newdata
