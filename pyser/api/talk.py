@@ -42,7 +42,7 @@ Regards,
 PySer conference
 """
 
-blueprint = Blueprint('user', 'user')
+blueprint = Blueprint('talk', 'talk')
 
 
 @blueprint.route('/year/<year_id>', endpoint='talks')
@@ -55,7 +55,9 @@ class TalkListAPI(ProtectedMethodView):
             event = Event.get(year=int(year_id))
         except Event.DoesNotExist:
             abort(404, message='No such event')
-        return paginate(event.talks.order_by(Talk.start), pagination)
+        query = event.talks.order_by(Talk.start)
+        response = paginate(query, pagination)
+        return response
 
     @jwt_required
     @blueprint.arguments(TalkSchema)
@@ -108,16 +110,20 @@ class UserTalkListAPI(ProtectedMethodView):
 
 @blueprint.route('/year/<year_id>/published', endpoint='talks_published')
 class PublishedTalkListAPI(MethodView):
-    @blueprint.arguments(PageInSchema(), location='headers')
     @blueprint.response(PageOutSchema(TalkSchema))
-    def get(self, pagination, year_id):
+    def get(self, year_id):
         """Get list of talks"""
         try:
             event = Event.get(year=int(year_id))
         except Event.DoesNotExist:
             abort(404, message='No such event')
         query = event.talks.where(Talk.published).order_by(Talk.start)
-        return paginate(query, pagination)
+        result = {
+            'data': query,
+            'pages': 1,
+            'total': query.count(),
+        }
+        return result
 
 
 @blueprint.route('/year/<year_id>/announce', endpoint='talks_announce')

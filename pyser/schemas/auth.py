@@ -22,6 +22,11 @@ class UserSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
     active = fields.Boolean(description='Activate the user', default=True)
     admin = fields.Boolean(description='Is the user admin?', default=False)
+    bio = fields.String(description='Biography')
+    facebook = fields.String(description='Biography')
+    twitter = fields.String(description='Biography')
+    firstName = fields.String(description='Biography')
+    lastName = fields.String(description='Biography')
     email = fields.Email(required=True, description='Email')
     password = fields.Str(
         required=True,

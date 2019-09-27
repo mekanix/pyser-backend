@@ -15,3 +15,5 @@ database.db
 site.retry
 test.db
 vars.mk
+project.mk
+local_config.py
