@@ -25,6 +25,7 @@ def create_api(app):
     from .cfs import blueprint as cfs
     from .email import blueprint as email
     from .event import blueprint as event
+    from .gallery import blueprint as gallery
     from .hall import blueprint as hall
     from .landing import blueprint as landing
     from .me import blueprint as me
@@ -42,6 +43,7 @@ def create_api(app):
             cfs,
             email,
             event,
+            gallery,
             hall,
             landing,
             me,
