@@ -1,4 +1,4 @@
-from flask import Blueprint, Flask
+from flask import Blueprint, Flask, send_file
 from flask_collect import Collect
 from flask_jwt_extended import JWTManager
 from flask_security import PeeweeUserDatastore, Security
@@ -16,6 +16,14 @@ def create_app(config, app=None):
     if app is None:
         app = Flask(__name__)
         app.config.from_object(config)
+
+    @app.route('/media/<path:path>')
+    def send_media(path):
+        fullPath = f"../{app.config['MEDIA_PATH']}/{path}"
+        try:
+            return send_file(fullPath)
+        except FileNotFoundError:
+            return 'No such file', 404
 
     app.collect = Collect(app)
     db.init_app(app)
