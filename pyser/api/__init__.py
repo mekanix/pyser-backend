@@ -44,6 +44,7 @@ def create_api(app):
     from .hall import blueprint as hall
     from .landing import blueprint as landing
     from .me import blueprint as me
+    from .role import blueprint as role
     from .talk import blueprint as talk
     from .user import blueprint as user
 
@@ -68,6 +69,7 @@ def create_api(app):
             hall,
             landing,
             me,
+            role,
             talk,
             user,
         ],
