@@ -3,15 +3,23 @@ from marshmallow import fields
 from .base import BaseSchema
 
 
+class UserAssignSchema(BaseSchema):
+    id = fields.Integer(description='ID')
+
+
 class TokenSchema(BaseSchema):
     email = fields.Email(required=True, description='Email')
     password = fields.Str(required=True, description='Password')
 
 
-class RoleSchema(BaseSchema):
+class RoleBaseSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
-    description = fields.String(required=True, description='Description')
-    name = fields.String(required=True, description='Name')
+    description = fields.String(description='Description')
+    name = fields.String(description='Name')
+
+
+class RoleSchema(RoleBaseSchema):
+    users = fields.List(fields.Nested('UserSchema'), dump_only=True)
 
 
 class UserRolesSchema(BaseSchema):
@@ -23,10 +31,10 @@ class UserSchema(BaseSchema):
     active = fields.Boolean(description='Activate the user', default=True)
     admin = fields.Boolean(description='Is the user admin?', default=False)
     bio = fields.String(description='Biography')
-    facebook = fields.String(description='Biography')
-    twitter = fields.String(description='Biography')
-    firstName = fields.String(description='Biography')
-    lastName = fields.String(description='Biography')
+    facebook = fields.String(description='Facebook')
+    twitter = fields.String(description='Twitter')
+    firstName = fields.String(description='First name')
+    lastName = fields.String(description='Last name')
     email = fields.Email(required=True, description='Email')
     password = fields.Str(
         required=True,
