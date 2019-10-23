@@ -20,7 +20,7 @@ from ..schemas.auth import LoginSchema, RefreshSchema, TokenSchema
 blueprint = Blueprint('auth', 'auth')
 
 
-@blueprint.route('/login', endpoint='auth_login')
+@blueprint.route('/login', endpoint='login')
 class AuthLoginAPI(MethodView):
     @blueprint.response(LoginSchema)
     @blueprint.arguments(TokenSchema)
@@ -66,7 +66,7 @@ class AuthLoginAPI(MethodView):
         return resp
 
 
-@blueprint.route('/logout', endpoint='auth_logout')
+@blueprint.route('/logout', endpoint='logout')
 class AuthLogoutAPI(MethodView):
     def post(self):
         """Logout"""
@@ -75,7 +75,7 @@ class AuthLogoutAPI(MethodView):
         return resp
 
 
-@blueprint.route('/refresh', endpoint='auth_refresh')
+@blueprint.route('/refresh', endpoint='refresh')
 class AuthRefreshAPI(MethodView):
     @blueprint.response(RefreshSchema)
     @jwt_refresh_token_required

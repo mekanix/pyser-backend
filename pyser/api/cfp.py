@@ -1,4 +1,3 @@
-from flask import current_app, request
 from flask.views import MethodView
 from flask_rest_api import Blueprint
 
@@ -46,13 +45,13 @@ class CfpAPI(MethodView):
     def post(self, args):
         """Submit talk proposal"""
         cfp = CfP(**args)
-        username = current_app.config.get('MAIL_USERNAME', None)
-        password = current_app.config.get('MAIL_PASSWORD', None)
-        host = current_app.config.get('MAIL_SERVER', None)
-        port = current_app.config.get('MAIL_PORT', 25)
-        to = current_app.config.get('MAIL_ADDRESS', None)
-        subject = subject_format.format(cfp.talk.title)
-        fromAddress = cfp.person.email
+        #  username = current_app.config.get('MAIL_USERNAME', None)
+        #  password = current_app.config.get('MAIL_PASSWORD', None)
+        #  host = current_app.config.get('MAIL_SERVER', None)
+        #  port = current_app.config.get('MAIL_PORT', 25)
+        #  to = current_app.config.get('MAIL_ADDRESS', None)
+        #  subject = subject_format.format(cfp.talk.title)
+        #  fromAddress = cfp.person.email
         try:
             cfp.person = User.get(email=cfp.person.email)
         except User.DoesNotExist:
@@ -64,11 +63,11 @@ class CfpAPI(MethodView):
         cfp.talk.event = events[0]
         cfp.talk.user = cfp.person
         cfp.talk.save()
-        text = message_format.format(
-            talk=cfp.talk,
-            person=cfp.person,
-            referrer=request.referrer,
-        )
+        #  text = message_format.format(
+        #  talk=cfp.talk,
+        #  person=cfp.person,
+        #  referrer=request.referrer,
+        #  )
         #  error = send_mail(
         #  fromAddress,
         #  to,
@@ -81,7 +80,7 @@ class CfpAPI(MethodView):
         #  )
         #  if error:
         #  return {'message': 'Unable to send email'}, 409
-        text = presenter_message_format.format(cfp.talk.title)
+        presenter_message_format.format(cfp.talk.title)
         #  error = send_mail(
         #  to,
         #  fromAddress,

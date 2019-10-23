@@ -60,8 +60,8 @@ class VolunteeringUserAPI(MethodView):
     @blueprint.response(UserSchema)
     def post(self, args):
         """Create new volunteer"""
-        volunteers = User.select().where(User.volunteer)
-        volunteerCount = volunteers.count()
+        #  volunteers = User.select().where(User.volunteer)
+        #  volunteerCount = volunteers.count()
         try:
             user = User.get(email=args['email'])
         except User.DoesNotExist:

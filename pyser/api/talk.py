@@ -10,6 +10,7 @@ from ..models.event import Event
 from ..models.talk import Talk
 from ..schemas.paging import PageInSchema, PageOutSchema, paginate
 from ..schemas.talk import TalkSchema
+from ..utils import send_mail
 from .methodviews import ProtectedMethodView
 
 announce_subject = '[PySer] Your talk is {}accepted'
@@ -154,11 +155,11 @@ class AnnounceTalkListAPI(ProtectedMethodView):
             #  )
             #  except Exception:
             #  pass
-        for talk in event.talks.where(Talk.published == False):
+        for talk in event.talks.where(not Talk.published):
             text = reject_message.format(talk.title)
             subject = announce_subject.format('not ')
             try:
-                error = send_mail(
+                send_mail(
                     'office@pyser.org',
                     talk.user.email,
                     subject,

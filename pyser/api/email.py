@@ -7,6 +7,7 @@ from ..models.email import Email
 from ..models.event import Event
 from ..models.talk import Talk
 from ..schemas.email import EmailSchema
+from ..utils import send_mail
 from .methodviews import ProtectedMethodView
 
 blueprint = Blueprint('email', 'email')
