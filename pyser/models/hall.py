@@ -8,4 +8,4 @@ Model = db.Model
 
 class Hall(Model):
     name = TextField()
-    event = ForeignKeyField(Event, related_name='halls')
+    event = ForeignKeyField(Event, backref='halls')

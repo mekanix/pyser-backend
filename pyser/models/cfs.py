@@ -10,4 +10,4 @@ class CfS(Model):
     email = TextField()
     organization = TextField()
     message = TextField()
-    event = ForeignKeyField(Event, related_name='cfs')
+    event = ForeignKeyField(Event, backref='cfs')

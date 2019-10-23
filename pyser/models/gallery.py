@@ -7,12 +7,12 @@ Model = db.Model
 
 
 class GalleryAlbum(Model):
-    event = ForeignKeyField(Event, related_name='albums', null=True)
+    event = ForeignKeyField(Event, backref='albums', null=True)
     name = TextField(index=True)
 
 
 class GalleryFile(Model):
-    album = ForeignKeyField(GalleryAlbum, related_name='files')
+    album = ForeignKeyField(GalleryAlbum, backref='files')
     filename = TextField(index=True)
 
     def url(self, prefix=''):

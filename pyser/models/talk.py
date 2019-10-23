@@ -2,8 +2,8 @@ from peewee import (
     BooleanField,
     DateTimeField,
     ForeignKeyField,
-    TextField,
     IntegerField,
+    TextField
 )
 
 from ..date import datetime_format
@@ -17,10 +17,10 @@ Model = db.Model
 class Talk(Model):
     description = TextField()
     duration = IntegerField()
-    event = ForeignKeyField(Event, related_name='talks')
+    event = ForeignKeyField(Event, backref='talks')
     hall = TextField(null=True)
     published = BooleanField()
     start = DateTimeField(formats=[datetime_format], null=True)
     title = TextField()
-    user = ForeignKeyField(User, related_name='talks')
+    user = ForeignKeyField(User, backref='talks')
     video = TextField(null=True)
