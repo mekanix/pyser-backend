@@ -1,11 +1,14 @@
-from flask.views import MethodView
-from flask_rest_api import Blueprint
+from flask_jwt_extended import get_jwt_identity
+from flask_rest_api import Blueprint, abort
 
 from ..models.auth import User
 from ..models.cfp import CfP
 from ..models.event import Event
+from ..models.talk import Talk
 #  from ..utils import send_mail
 from ..schemas.cfp import CfPSchema
+from ..schemas.talk import TalkSchema
+from .methodviews import ProtectedMethodView
 
 message_format = """
 Details: {referrer}/{talk.id}
@@ -39,58 +42,22 @@ blueprint = Blueprint('cfp', 'cfp')
 
 
 @blueprint.route('', endpoint='cfp')
-class CfpAPI(MethodView):
-    @blueprint.arguments(CfPSchema)
+class CfpAPI(ProtectedMethodView):
+    @blueprint.arguments(TalkSchema)
     @blueprint.response(CfPSchema)
     def post(self, args):
         """Submit talk proposal"""
-        cfp = CfP(**args)
-        #  username = current_app.config.get('MAIL_USERNAME', None)
-        #  password = current_app.config.get('MAIL_PASSWORD', None)
-        #  host = current_app.config.get('MAIL_SERVER', None)
-        #  port = current_app.config.get('MAIL_PORT', 25)
-        #  to = current_app.config.get('MAIL_ADDRESS', None)
-        #  subject = subject_format.format(cfp.talk.title)
-        #  fromAddress = cfp.person.email
+        talk = Talk(**args)
+        talk.published = False
+        email = get_jwt_identity()
         try:
-            cfp.person = User.get(email=cfp.person.email)
+            person = User.get(email=email)
         except User.DoesNotExist:
-            cfp.person.active = True
-            cfp.person.admin = False
-            cfp.person.volunteer = False
-            cfp.person.save()
+            abort(404, message='No such user')
+        cfp = CfP(person, talk)
         events = Event.select().order_by(Event.year.desc())
         cfp.talk.event = events[0]
         cfp.talk.user = cfp.person
         cfp.talk.save()
-        #  text = message_format.format(
-        #  talk=cfp.talk,
-        #  person=cfp.person,
-        #  referrer=request.referrer,
-        #  )
-        #  error = send_mail(
-        #  fromAddress,
-        #  to,
-        #  subject,
-        #  text,
-        #  username,
-        #  password,
-        #  host,
-        #  port,
-        #  )
-        #  if error:
-        #  return {'message': 'Unable to send email'}, 409
         presenter_message_format.format(cfp.talk.title)
-        #  error = send_mail(
-        #  to,
-        #  fromAddress,
-        #  subject,
-        #  text,
-        #  username,
-        #  password,
-        #  host,
-        #  port,
-        #  )
-        #  if error:
-        #  return {'message': 'Unable to send email'}, 409
         return cfp
