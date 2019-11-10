@@ -1,6 +1,6 @@
 from flask.views import MethodView
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from flask_rest_api import Blueprint, abort
+from flask_smorest import Blueprint, abort
 
 from ..models.auth import User
 from ..models.event import Event

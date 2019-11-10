@@ -1,6 +1,6 @@
 #  from flask import current_app
 from flask.views import MethodView
-from flask_rest_api import Blueprint
+from flask_smorest import Blueprint
 
 from ..models.email import Email
 from ..schemas.email import EmailSchema

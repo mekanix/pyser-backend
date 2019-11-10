@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask.views import MethodView
 from flask_jwt_extended import get_jwt_identity, jwt_optional, jwt_required
-from flask_rest_api import Blueprint
+from flask_smorest import Blueprint
 
 from ..models.auth import User
 from ..models.blog import Blog

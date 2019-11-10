@@ -4,8 +4,8 @@ from string import ascii_letters
 from flask import current_app
 from flask.views import MethodView
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from flask_rest_api import Blueprint, abort
 from flask_security.utils import hash_password
+from flask_smorest import Blueprint, abort
 
 from ..models.auth import User
 from ..schemas.auth import UserSchema

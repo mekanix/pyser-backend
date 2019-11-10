@@ -1,10 +1,11 @@
 from flask import current_app
 from flask.views import MethodView
-from flask_rest_api import Blueprint, abort
+from flask_smorest import Blueprint, abort
+from werkzeug.utils import secure_filename
 
 from ..models.event import Event
 from ..models.gallery import GalleryAlbum, GalleryFile
-from ..schemas.gallery import GalleryAlbumSchema
+from ..schemas.gallery import GalleryAlbumSchema, GalleryUpload
 from ..schemas.paging import PageInSchema, PageOutSchema, paginate
 
 blueprint = Blueprint('gallery', 'gallery')
@@ -56,3 +57,22 @@ class GalleryAlbumAPI(MethodView):
             abort(409, message='Backend misconfiguration, no MEDIAL_URL')
         album.prefix = prefix
         return album
+
+    @blueprint.arguments(GalleryUpload, location='files')
+    @blueprint.response(GalleryUpload)
+    def post(self, args, name, year=None):
+        """Upload picture to album"""
+        print(args)
+        if year is not None:
+            try:
+                event = Event.get(year=year)
+            except Event.DoesNotExist:
+                abort(404, message='No such event')
+        else:
+            event = None
+        #  print(secure_filename(args['file'].filename))
+        try:
+            album = GalleryAlbum.get(name=name, event=event)
+        except GalleryAlbum.DoesNotExist:
+            abort(404, message='No such album')
+        return {}
