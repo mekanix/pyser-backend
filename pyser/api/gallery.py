@@ -1,4 +1,5 @@
-from tempfile import mkstemp
+import os
+from tempfile import NamedTemporaryFile
 
 from flask import current_app
 from flask.views import MethodView
@@ -68,7 +69,7 @@ class GalleryAlbumAPI(MethodView):
 
     @blueprint.arguments(GalleryUploadSchema, location='files')
     @blueprint.arguments(ResumableGalleryUploadSchema, location='form')
-    @blueprint.response(GalleryUploadSchema)
+    @blueprint.response(ResumableGalleryUploadSchema)
     def post(self, fileargs, formargs, name, year=None):
         """Upload picture to album"""
         if year is not None:
@@ -78,28 +79,60 @@ class GalleryAlbumAPI(MethodView):
                 abort(404, message='No such event')
         else:
             event = None
-        #  print(secure_filename(args['file'].filename))
         try:
             album = GalleryAlbum.get(name=name, event=event)
         except GalleryAlbum.DoesNotExist:
             abort(404, message='No such album')
+        album.prefix = current_app.config.get('MEDIA_URL', None)
+        if album.prefix is None:
+            abort(409, message='Backend misconfiguration, no MEDIAL_URL')
         uploadFile = fileargs['file']
         chunkNumber = formargs['resumableChunkNumber']
-        currentChunkSize: formargs['resumableCurrentChunkSize']
         identifier = formargs['resumableIdentifier']
         fileEntry = chunks.get(identifier, None)
+        media_path = os.path.abspath(
+            current_app.config.get(
+                'MEDIA_PATH',
+                None,
+            )
+        )
         if fileEntry is None:
-            fd, tempfile = mkstemp()
+            tempfile = NamedTemporaryFile(
+                dir=f'{media_path}/tmp',
+                delete=False
+            )
+            tempfile.close()
             fileEntry = {
                 'chunkSize': formargs['resumableChunkSize'],
                 'filename': formargs['resumableFilename'],
                 'identifier': identifier,
-                'temp': tempfile,
+                'temp': tempfile.name,
                 'total': formargs['resumableTotalChunks'],
                 'type': formargs['resumableType'],
             }
             chunks[identifier] = fileEntry
-        tempfile = fileEntry['temp']
-        chunkSize = fileEntry['chunkSize']
-        print(identifier, chunkNumber, chunkSize, tempfile, uploadFile)
-        return {}
+            uploadFile.save(fileEntry['temp'])
+        else:
+            with open(fileEntry['temp'], 'ab') as tempfile:
+                offset = (chunkNumber - 1) * fileEntry['chunkSize']
+                tempfile.seek(offset)
+                tempfile.write(uploadFile.read())
+
+        if chunkNumber == fileEntry['total']:
+            tempfile = fileEntry['temp']
+            try:
+                finalFile = GalleryFile.get(
+                    album=album,
+                    filename=secure_filename(uploadFile.filename),
+                )
+            except GalleryFile.DoesNotExist:
+                finalFile = GalleryFile(
+                    album=album,
+                    filename=secure_filename(uploadFile.filename),
+                )
+            file_dir = f'{media_path}/{event.year}/{album.name}'
+            if not os.path.exists(file_dir):
+                os.makedirs(file_dir)
+            os.rename(tempfile, finalFile.path(prefix=media_path))
+            finalFile.save()
+        return formargs
