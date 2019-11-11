@@ -1,3 +1,5 @@
+from tempfile import mkstemp
+
 from flask import current_app
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
@@ -5,10 +7,16 @@ from werkzeug.utils import secure_filename
 
 from ..models.event import Event
 from ..models.gallery import GalleryAlbum, GalleryFile
-from ..schemas.gallery import GalleryAlbumSchema, GalleryUpload
+from ..schemas.gallery import (
+    GalleryAlbumSchema,
+    GalleryUploadSchema,
+    ResumableGalleryUploadSchema
+)
 from ..schemas.paging import PageInSchema, PageOutSchema, paginate
 
 blueprint = Blueprint('gallery', 'gallery')
+
+chunks = {}
 
 
 @blueprint.route('', endpoint='albums')
@@ -58,11 +66,11 @@ class GalleryAlbumAPI(MethodView):
         album.prefix = prefix
         return album
 
-    @blueprint.arguments(GalleryUpload, location='files')
-    @blueprint.response(GalleryUpload)
-    def post(self, args, name, year=None):
+    @blueprint.arguments(GalleryUploadSchema, location='files')
+    @blueprint.arguments(ResumableGalleryUploadSchema, location='form')
+    @blueprint.response(GalleryUploadSchema)
+    def post(self, fileargs, formargs, name, year=None):
         """Upload picture to album"""
-        print(args)
         if year is not None:
             try:
                 event = Event.get(year=year)
@@ -75,4 +83,23 @@ class GalleryAlbumAPI(MethodView):
             album = GalleryAlbum.get(name=name, event=event)
         except GalleryAlbum.DoesNotExist:
             abort(404, message='No such album')
+        uploadFile = fileargs['file']
+        chunkNumber = formargs['resumableChunkNumber']
+        currentChunkSize: formargs['resumableCurrentChunkSize']
+        identifier = formargs['resumableIdentifier']
+        fileEntry = chunks.get(identifier, None)
+        if fileEntry is None:
+            fd, tempfile = mkstemp()
+            fileEntry = {
+                'chunkSize': formargs['resumableChunkSize'],
+                'filename': formargs['resumableFilename'],
+                'identifier': identifier,
+                'temp': tempfile,
+                'total': formargs['resumableTotalChunks'],
+                'type': formargs['resumableType'],
+            }
+            chunks[identifier] = fileEntry
+        tempfile = fileEntry['temp']
+        chunkSize = fileEntry['chunkSize']
+        print(identifier, chunkNumber, chunkSize, tempfile, uploadFile)
         return {}
