@@ -11,11 +11,11 @@ from flask_jwt_extended import (
     set_refresh_cookies,
     unset_jwt_cookies
 )
-from flask_rest_api import Blueprint, abort
-from flask_security.utils import verify_password
+from flask_security.utils import hash_password, verify_password
+from flask_smorest import Blueprint, abort
 
 from ..models.auth import User
-from ..schemas.auth import LoginSchema, RefreshSchema, TokenSchema
+from ..schemas.auth import LoginSchema, RefreshSchema, TokenSchema, UserSchema
 
 blueprint = Blueprint('auth', 'auth')
 
@@ -38,8 +38,8 @@ class AuthLoginAPI(MethodView):
             abort(403, message='No such user, or wrong password')
         if not verify_password(password, user.password):
             abort(403, message='No such user, or wrong password')
-        access_token = create_access_token(identity=user.email)
-        refresh_token = create_refresh_token(identity=user.email)
+        access_token = create_access_token(identity=user.id)
+        refresh_token = create_refresh_token(identity=user.id)
         access_expire = current_app.config['JWT_ACCESS_TOKEN_EXPIRES']
         refresh_expire = current_app.config['JWT_REFRESH_TOKEN_EXPIRES']
         resp = jsonify(
@@ -81,13 +81,15 @@ class AuthRefreshAPI(MethodView):
     @jwt_refresh_token_required
     def post(self):
         """Refresh access token"""
-        email = get_jwt_identity()
+        identity = get_jwt_identity()
         try:
-            user = User.get(email=email)
+            user = User.get(id=identity)
         except User.DoesNotExist:
-            return {'message': 'No such user, or wrong password'}, 403
+            abort(403, message='No such user, or wrong password')
+        if not user.active:
+            abort(403, message='No such user, or wrong password')
         access_expire = current_app.config['JWT_ACCESS_TOKEN_EXPIRES']
-        access_token = create_access_token(identity=user.email)
+        access_token = create_access_token(identity=identity)
         refresh_expire_date = datetime.strptime(
             request.cookies['refresh_expire'],
             '%Y-%m-%d %H:%M:%S.%f'
@@ -102,3 +104,20 @@ class AuthRefreshAPI(MethodView):
         )
         set_access_cookies(resp, access_token)
         return resp
+
+
+@blueprint.route('/register', endpoint='register')
+class AuthRegisterAPI(MethodView):
+    @blueprint.response(UserSchema)
+    @blueprint.arguments(TokenSchema)
+    def post(self, args):
+        """Register new user"""
+        email = args.get('email')
+        password = args.get('password')
+        try:
+            User.get(email=args.get('email'))
+            abort(409, message='User already registered')
+        except User.DoesNotExist:
+            user = User(email=email, password=hash_password(password))
+        user.save()
+        return user

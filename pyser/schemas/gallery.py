@@ -1,8 +1,11 @@
+import sys
+
 from flask_smorest.fields import Upload
 from marshmallow import fields
 
 from .base import BaseSchema
 from .event import EventSchema
+from .paging import PageOutSchema
 
 
 class GalleryFileSchema(BaseSchema):
@@ -39,3 +42,6 @@ class ResumableGalleryUploadSchema(BaseSchema):
     resumableTotalChunks = fields.Integer()
     resumableTotalSize = fields.Integer()
     resumableType = fields.String()
+
+
+PageOutSchema(GalleryAlbumSchema, sys.modules[__name__])

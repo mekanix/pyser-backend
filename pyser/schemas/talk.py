@@ -1,3 +1,4 @@
+import sys
 from copy import copy
 from datetime import datetime
 
@@ -7,6 +8,7 @@ from ..date import datetime_format, peewee_datetime_format
 from .auth import UserSchema
 from .base import BaseSchema
 from .event import EventSchema
+from .paging import PageOutSchema
 
 
 class TalkSchema(BaseSchema):
@@ -30,3 +32,6 @@ class TalkSchema(BaseSchema):
         if isinstance(start, str):
             newdata.start = datetime.strptime(start, peewee_datetime_format)
         return newdata
+
+
+PageOutSchema(TalkSchema, sys.modules[__name__])

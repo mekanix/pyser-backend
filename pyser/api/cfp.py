@@ -49,9 +49,9 @@ class CfpAPI(ProtectedMethodView):
         """Submit talk proposal"""
         talk = Talk(**args)
         talk.published = False
-        email = get_jwt_identity()
+        user_id = get_jwt_identity()
         try:
-            person = User.get(email=email)
+            person = User.get(id=user_id)
         except User.DoesNotExist:
             abort(404, message='No such user')
         cfp = CfP(person, talk)

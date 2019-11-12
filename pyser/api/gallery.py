@@ -9,11 +9,12 @@ from werkzeug.utils import secure_filename
 from ..models.event import Event
 from ..models.gallery import GalleryAlbum, GalleryFile
 from ..schemas.gallery import (
+    GalleryAlbumPageOutSchema,
     GalleryAlbumSchema,
     GalleryUploadSchema,
     ResumableGalleryUploadSchema
 )
-from ..schemas.paging import PageInSchema, PageOutSchema, paginate
+from ..schemas.paging import PageInSchema, paginate
 
 blueprint = Blueprint('gallery', 'gallery')
 
@@ -24,7 +25,7 @@ chunks = {}
 @blueprint.route('/<int:year>', endpoint='year_albums')
 class GalleryAlbumListAPI(MethodView):
     @blueprint.arguments(PageInSchema(), location='headers')
-    @blueprint.response(PageOutSchema(GalleryAlbumSchema))
+    @blueprint.response(GalleryAlbumPageOutSchema)
     def get(self, pagination, year=None):
         """Get list of albums"""
         if year is None:

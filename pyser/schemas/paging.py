@@ -24,10 +24,21 @@ class PageInSchema(BaseSchema):
     PerPage = fields.Int()
 
 
-def PageOutSchema(schema):
-    class PS(BaseSchema):
-        pages = fields.Integer()
-        total = fields.Integer()
-        data = fields.List(fields.Nested(schema))
+def PageOutSchema(schema, module):
+    name = schema.__name__
+    if name.endswith("Schema"):
+        name = name[:-6] or name
+    name += 'PageOutSchema'
 
+    base = (schema, )
+    PS = type(
+        name,
+        base,
+        {
+            'pages': fields.Integer(),
+            'total': fields.Integer(),
+            'data': fields.List(fields.Nested(schema)),
+        }
+    )
+    setattr(module, name, PS)
     return PS

@@ -8,8 +8,8 @@ from peewee import fn
 from ..models.auth import User
 from ..models.cfs import CfS
 from ..models.event import Event
-from ..schemas.cfs import CfSSchema
-from ..schemas.paging import PageInSchema, PageOutSchema, paginate
+from ..schemas.cfs import CfSPageOutSchema, CfSSchema
+from ..schemas.paging import PageInSchema, paginate
 
 blueprint = Blueprint('cfs', 'cfs')
 
@@ -17,7 +17,7 @@ blueprint = Blueprint('cfs', 'cfs')
 @blueprint.route('/<year>', endpoint='cfs_list')
 class CfSAPI(MethodView):
     @blueprint.arguments(PageInSchema(), location='headers')
-    @blueprint.response(PageOutSchema(CfSSchema))
+    @blueprint.response(CfSPageOutSchema)
     def get(self, pagination, year):
         """Get list of sponsors"""
         try:
@@ -67,7 +67,7 @@ class CfSDetailAPI(MethodView):
     def patch(self, args, cfs_id):
         """Edit sponsor"""
         try:
-            user = User.get(email=get_jwt_identity())
+            user = User.get(id=get_jwt_identity())
         except User.DoesNotExist:
             abort(404, message='User not found')
         try:
@@ -90,7 +90,7 @@ class CfSDetailAPI(MethodView):
     def delete(self, cfs_id):
         """Delete sponsor"""
         try:
-            User.get(email=get_jwt_identity())
+            User.get(id=get_jwt_identity())
         except User.DoesNotExist:
             abort(404, message='User not found')
         try:

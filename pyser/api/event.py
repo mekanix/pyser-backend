@@ -6,8 +6,8 @@ from ..models.auth import User
 from ..models.event import Event
 from ..models.gallery import GalleryAlbum
 from ..models.hall import Hall
-from ..schemas.event import EventSchema
-from ..schemas.paging import PageInSchema, PageOutSchema, paginate
+from ..schemas.event import EventPageOutSchema, EventSchema
+from ..schemas.paging import PageInSchema, paginate
 
 blueprint = Blueprint('event', 'event')
 
@@ -15,7 +15,7 @@ blueprint = Blueprint('event', 'event')
 @blueprint.route('', endpoint='events')
 class EventListAPI(MethodView):
     @blueprint.arguments(PageInSchema(), location='headers')
-    @blueprint.response(PageOutSchema(EventSchema))
+    @blueprint.response(EventPageOutSchema)
     def get(self, pagination):
         """List events"""
         query = Event.select().order_by(Event.year.desc())
@@ -34,7 +34,7 @@ class EventListAPI(MethodView):
             event.published = False
             event.save()
         try:
-            user = User.get(email=get_jwt_identity())
+            user = User.get(id=get_jwt_identity())
         except User.DoesNotExist:
             abort(404, message='User not found')
         if not user.admin:

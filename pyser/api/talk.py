@@ -8,8 +8,8 @@ from flask_smorest import Blueprint, abort
 from ..models.auth import User
 from ..models.event import Event
 from ..models.talk import Talk
-from ..schemas.paging import PageInSchema, PageOutSchema, paginate
-from ..schemas.talk import TalkSchema
+from ..schemas.paging import PageInSchema, paginate
+from ..schemas.talk import TalkPageOutSchema, TalkSchema
 from ..utils import send_mail
 from .methodviews import ProtectedMethodView
 
@@ -49,7 +49,7 @@ blueprint = Blueprint('talk', 'talk')
 @blueprint.route('/year/<year_id>', endpoint='talks')
 class TalkListAPI(ProtectedMethodView):
     @blueprint.arguments(PageInSchema(), location='headers')
-    @blueprint.response(PageOutSchema(TalkSchema))
+    @blueprint.response(TalkPageOutSchema)
     def get(self, pagination, year_id):
         """Get list of talks"""
         try:
@@ -66,7 +66,7 @@ class TalkListAPI(ProtectedMethodView):
     def post(self, args, year_id):
         """Create new talk"""
         try:
-            user = User.get(email=get_jwt_identity())
+            user = User.get(id=get_jwt_identity())
         except User.DoesNotExist:
             abort(404, message='User not found')
         try:
@@ -93,11 +93,11 @@ class TalkListAPI(ProtectedMethodView):
 @blueprint.route('/year/<year_id>/user', endpoint='talks_user')
 class UserTalkListAPI(ProtectedMethodView):
     @blueprint.arguments(PageInSchema(), location='headers')
-    @blueprint.response(PageOutSchema(TalkSchema))
+    @blueprint.response(TalkPageOutSchema)
     def get(self, pagination, year_id):
         """Get list of talks by user"""
         try:
-            user = User.get(email=get_jwt_identity())
+            user = User.get(id=get_jwt_identity())
         except User.DoesNotExist:
             abort(404, message='User not found')
         try:
@@ -111,7 +111,7 @@ class UserTalkListAPI(ProtectedMethodView):
 
 @blueprint.route('/year/<year_id>/published', endpoint='talks_published')
 class PublishedTalkListAPI(MethodView):
-    @blueprint.response(PageOutSchema(TalkSchema))
+    @blueprint.response(TalkPageOutSchema)
     def get(self, year_id):
         """Get list of talks"""
         try:
@@ -191,7 +191,7 @@ class TalkDetailAPI(MethodView):
     def patch(self, args, talk_id):
         """Edit talk"""
         try:
-            User.get(email=get_jwt_identity())
+            User.get(id=get_jwt_identity())
         except User.DoesNotExist:
             abort(404, message='User not found')
         try:
@@ -216,7 +216,7 @@ class TalkDetailAPI(MethodView):
     def delete(self, talk_id):
         """Delete talk"""
         try:
-            User.get(email=get_jwt_identity())
+            User.get(id=get_jwt_identity())
         except User.DoesNotExist:
             abort(404, message='User not found')
         try:
