@@ -5,7 +5,6 @@ class TestAuth(Base):
     def test_me(self, user_factory):
         user = user_factory()
         user.save()
-        print(user.id, user.email, user.active, user.admin)
         response = self.login('auth.login', user, 'Sekrit')
         assert response.status_code == 200
         response = self.get('me.me')
