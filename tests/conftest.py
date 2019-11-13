@@ -1,12 +1,15 @@
 import os
+from importlib import import_module
 
 import pytest
 from config import configs
+from name import app_name
 from peewee_migrate import Router
-from pyser import create_app
 from pytest_factoryboy import register
 
 from .factories import AdminFactory, RoleFactory, UserFactory
+
+application = import_module(f'{app_name}')
 
 register(UserFactory)
 register(AdminFactory)
@@ -15,7 +18,8 @@ register(RoleFactory)
 
 @pytest.fixture
 def app():
-    flask_app = create_app(configs['testing'])
+    config = configs['testing']
+    flask_app = application.create_app(config)
     router = Router(flask_app.db.database)
     router.run()
     yield flask_app
