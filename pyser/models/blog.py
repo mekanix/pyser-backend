@@ -14,7 +14,7 @@ Model = db.Model
 
 
 class Blog(Model):
-    author = ForeignKeyField(User, related_name='blogs')
+    author = ForeignKeyField(User, backref='blogs')
     content = TextField()
     date = DateTimeField(
         formats=[datetime_format],

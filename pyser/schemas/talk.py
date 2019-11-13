@@ -1,12 +1,14 @@
-import datetime
+import sys
 from copy import copy
+from datetime import datetime
 
 from marshmallow import fields, pre_dump
 
-from ..date import datetime_format
+from ..date import datetime_format, peewee_datetime_format
 from .auth import UserSchema
 from .base import BaseSchema
 from .event import EventSchema
+from .paging import PageOutSchema
 
 
 class TalkSchema(BaseSchema):
@@ -26,8 +28,10 @@ class TalkSchema(BaseSchema):
     @pre_dump
     def convert_date(self, data, many):
         start = getattr(data, 'start', None)
-        duration = getattr(data, 'duration', None)
         newdata = copy(data)
-        if None not in [duration, start]:
-            newdata.end = start + datetime.timedelta(minutes=duration)
+        if isinstance(start, str):
+            newdata.start = datetime.strptime(start, peewee_datetime_format)
         return newdata
+
+
+PageOutSchema(TalkSchema, sys.modules[__name__])

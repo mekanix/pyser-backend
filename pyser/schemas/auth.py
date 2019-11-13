@@ -1,6 +1,9 @@
+import sys
+
 from marshmallow import fields
 
 from .base import BaseSchema
+from .paging import PageOutSchema
 
 
 class UserAssignSchema(BaseSchema):
@@ -60,3 +63,7 @@ class RefreshSchema(BaseSchema):
 
 class LoginSchema(RefreshSchema):
     refresh = fields.Str()
+
+
+PageOutSchema(UserSchema, sys.modules[__name__])
+PageOutSchema(RoleSchema, sys.modules[__name__])

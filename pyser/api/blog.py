@@ -2,12 +2,12 @@ from datetime import datetime
 
 from flask.views import MethodView
 from flask_jwt_extended import get_jwt_identity, jwt_optional, jwt_required
-from flask_rest_api import Blueprint
+from flask_smorest import Blueprint
 
 from ..models.auth import User
 from ..models.blog import Blog
-from ..schemas.blog import BlogSchema
-from ..schemas.paging import PageInSchema, PageOutSchema, paginate
+from ..schemas.blog import BlogPageOutSchema, BlogSchema
+from ..schemas.paging import PageInSchema, paginate
 
 blueprint = Blueprint('blog', 'blog')
 
@@ -16,11 +16,11 @@ blueprint = Blueprint('blog', 'blog')
 class BlogListAPI(MethodView):
     @jwt_optional
     @blueprint.arguments(PageInSchema(), location='headers')
-    @blueprint.response(PageOutSchema(BlogSchema))
+    @blueprint.response(BlogPageOutSchema)
     def get(self, pagination):
         """List blog posts"""
-        email = get_jwt_identity()
-        if email is None:
+        user_id = get_jwt_identity()
+        if user_id is None:
             query = Blog.select().where(Blog.published)
         else:
             query = Blog.select()
@@ -33,9 +33,9 @@ class BlogListAPI(MethodView):
         """Create blog post"""
         blog = Blog(**args)
         blog.date = datetime.utcnow()
-        email = get_jwt_identity()
+        user_id = get_jwt_identity()
         try:
-            user = User.get(email=email)
+            user = User.get(id=user_id)
         except User.DoesNotExist:
             return {'message': 'User not found'}, 404
         try:

@@ -2,8 +2,9 @@
 
 
 export BIN_DIR=`dirname $0`
-export PROJECT_ROOT=`readlink -f "${BIN_DIR}/.."`
-export VIRTUALENV=${VIRTUALENV:="backend"}
+export PROJECT_ROOT="${BIN_DIR}/.."
+. "${PROJECT_ROOT}/name.py"
+export VIRTUALENV=${VIRTUALENV:="${app_name}back"}
 export FLASK_ENV=${FLASK_ENV:="production"}
 export PY_VERSION=${PY_VERSION:="3.6"}
 
@@ -12,7 +13,6 @@ setup() {
   update=${1}
   if [ ! -d ${HOME}/.virtualenvs/${VIRTUALENV} ]; then
       python${PY_VERSION} -m venv "${HOME}/.virtualenvs/${VIRTUALENV}"
-      cp "${PROJECT_ROOT}/templates/activate.fish" "${HOME}/.virtualenvs/${VIRTUALENV}/bin"
   fi
   . ${HOME}/.virtualenvs/${VIRTUALENV}/bin/activate
 

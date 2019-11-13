@@ -1,8 +1,11 @@
+import sys
+
 from marshmallow import fields
 
 from ..date import datetime_format
 from .auth import UserSchema
 from .base import BaseSchema
+from .paging import PageOutSchema
 
 
 class BlogSchema(BaseSchema):
@@ -17,3 +20,6 @@ class BlogSchema(BaseSchema):
     published = fields.Boolean(description='Published', default=False)
     slug = fields.Str(description='Slug', dump_only=True)
     title = fields.Str(description='Title')
+
+
+PageOutSchema(BlogSchema, sys.modules[__name__])

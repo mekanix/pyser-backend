@@ -1,12 +1,12 @@
 from flask.views import MethodView
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from flask_rest_api import Blueprint, abort
+from flask_smorest import Blueprint, abort
 
 from ..models.auth import User
 from ..models.event import Event
 from ..models.hall import Hall
-from ..schemas.hall import HallSchema
-from ..schemas.paging import PageInSchema, PageOutSchema, paginate
+from ..schemas.hall import HallPageOutSchema, HallSchema
+from ..schemas.paging import PageInSchema, paginate
 
 blueprint = Blueprint('hall', 'hall')
 
@@ -14,7 +14,7 @@ blueprint = Blueprint('hall', 'hall')
 @blueprint.route('/<year>', endpoint='halls')
 class HallListAPI(MethodView):
     @blueprint.arguments(PageInSchema(), location='headers')
-    @blueprint.response(PageOutSchema(HallSchema))
+    @blueprint.response(HallPageOutSchema)
     def get(self, pagination, year):
         """Get list of halls"""
         try:
@@ -29,7 +29,7 @@ class HallListAPI(MethodView):
     def post(self, args, year):
         """Create new hall"""
         try:
-            user = User.get(email=get_jwt_identity())
+            user = User.get(id=get_jwt_identity())
             if not user.admin:
                 abort(403, message='Permission denied')
         except User.DoesNotExist:

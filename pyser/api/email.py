@@ -1,12 +1,13 @@
 from flask import current_app
 from flask_jwt_extended import get_jwt_identity
-from flask_rest_api import Blueprint, abort
+from flask_smorest import Blueprint, abort
 
 from ..models.auth import User
 from ..models.email import Email
 from ..models.event import Event
 from ..models.talk import Talk
 from ..schemas.email import EmailSchema
+from ..utils import send_mail
 from .methodviews import ProtectedMethodView
 
 blueprint = Blueprint('email', 'email')
@@ -18,9 +19,9 @@ class EmailAPI(ProtectedMethodView):
     @blueprint.response(EmailSchema)
     def post(self, args):
         """Send email"""
-        email = get_jwt_identity()
+        user_id = get_jwt_identity()
         try:
-            adminUser = User.get(email=email)
+            adminUser = User.get(id=user_id)
         except User.DoesNotExist:
             return {'message': 'No such user'}, 404
         if not adminUser.admin:
