@@ -1,6 +1,7 @@
 #!/bin/sh
 
-
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
 export BIN_DIR=`dirname $0`
 export PROJECT_ROOT="${BIN_DIR}/.."
 . "${PROJECT_ROOT}/name.py"
