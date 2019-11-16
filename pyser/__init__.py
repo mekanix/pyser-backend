@@ -1,5 +1,6 @@
 from flask import Flask, send_file
 from flask_collect import Collect
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_security import PeeweeUserDatastore, Security
 
@@ -34,5 +35,6 @@ def create_app(config, app=None):
     app.security = Security(app, app.user_datastore)
     app.jwt = JWTManager(app)
     create_api(app)
+    app.cors = CORS(app, supports_credentials=True)
 
     return app
