@@ -6,6 +6,7 @@ from flask_security import PeeweeUserDatastore, Security
 
 from .api import create_api
 from .db import db
+from .utils import sendmail as sm
 
 
 def create_app(config, app=None):
@@ -20,6 +21,8 @@ def create_app(config, app=None):
             return send_file(fullPath)
         except FileNotFoundError:
             return 'No such file', 404
+
+    app.sendmail = lambda to, message: sm(app.config, to, message)
 
     app.collect = Collect(app)
     db.init_app(app)

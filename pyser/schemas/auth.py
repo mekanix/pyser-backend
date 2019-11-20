@@ -31,13 +31,8 @@ class UserRolesSchema(BaseSchema):
 
 class UserSchema(BaseSchema):
     id = fields.Integer(description='ID', dump_only=True)
-    active = fields.Boolean(description='Activate the user', default=True)
-    admin = fields.Boolean(description='Is the user admin?', default=False)
-    bio = fields.String(description='Biography')
-    facebook = fields.String(description='Facebook')
-    twitter = fields.String(description='Twitter')
-    firstName = fields.String(description='First name')
-    lastName = fields.String(description='Last name')
+    active = fields.Boolean(description='Activate the user')
+    admin = fields.Boolean(description='Is the user admin?')
     email = fields.Email(required=True, description='Email')
     password = fields.Str(
         required=True,
@@ -63,6 +58,11 @@ class RefreshSchema(BaseSchema):
 
 class LoginSchema(RefreshSchema):
     refresh = fields.Str()
+
+
+class ResetSchema(BaseSchema):
+    token = fields.String(required=True)
+    password = fields.String(required=True)
 
 
 PageOutSchema(UserSchema, sys.modules[__name__])

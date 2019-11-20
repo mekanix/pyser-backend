@@ -27,6 +27,13 @@ class Config:
         'name': 'database.db',
         'engine': 'SqliteDatabase',
     }
+    MAIL = {
+        #  'host': 'mail.example.com',
+        #  'port': 587,
+        #  'ssl': True,
+        #  'username': 'someone@example.com',
+        #  'password': 'Sekrit',
+    }
 
     @staticmethod
     def init_app(app):
