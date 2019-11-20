@@ -1,3 +1,4 @@
+from email.mime.text import MIMEText
 from urllib.parse import parse_qs, urlparse
 
 from flask import current_app
@@ -10,7 +11,6 @@ from ..models.event import Event
 from ..models.talk import Talk
 from ..schemas.paging import PageInSchema, paginate
 from ..schemas.talk import TalkPageOutSchema, TalkSchema
-from ..utils import send_mail
 from .methodviews import ProtectedMethodView
 
 announce_subject = '[PySer] Your talk is {}accepted'
@@ -134,41 +134,30 @@ class AnnounceTalkListAPI(ProtectedMethodView):
         try:
             event = Event.get(year=int(year_id))
         except Event.DoesNotExist:
-            return {'message': 'No such event'}, 404
-        username = current_app.config.get('MAIL_USERNAME', None)
-        password = current_app.config.get('MAIL_PASSWORD', None)
-        host = current_app.config.get('MAIL_SERVER', None)
-        port = current_app.config.get('MAIL_PORT', 25)
+            return abort(404, message='No such event')
         for talk in event.talks.where(Talk.published):
-            text = announce_message.format(talk.title, talk.start)
-            subject = announce_subject.format('')
-            #  try:
-            #  error = send_mail(
-            #  'office@pyser.org',
-            #  talk.user.email,
-            #  subject,
-            #  text,
-            #  username,
-            #  password,
-            #  host,
-            #  port,
-            #  )
-            #  except Exception:
-            #  pass
-        for talk in event.talks.where(not Talk.published):
-            text = reject_message.format(talk.title)
-            subject = announce_subject.format('not ')
+            msg = MIMEText(
+                announce_message.format(
+                    talk.title,
+                    talk.start,
+                ),
+                'plain',
+                'utf-8',
+            )
+            msg['From'] = 'office@pyser.org'
+            msg['Subject'] = announce_subject.format('')
+            to = [talk.user.email]
             try:
-                send_mail(
-                    'office@pyser.org',
-                    talk.user.email,
-                    subject,
-                    text,
-                    username,
-                    password,
-                    host,
-                    port,
-                )
+                current_app.sendmail(to, msg)
+            except Exception:
+                pass
+        for talk in event.talks.where(not Talk.published):
+            msg = MIMEText(reject_message.format(talk.title), 'plain', 'utf-8')
+            to = [talk.user.email]
+            msg['From'] = 'office@pyser.org'
+            msg['Subject'] = announce_subject.format('not ')
+            try:
+                current_app.sendmail(to, msg)
             except Exception:
                 pass
         return {'message': 'OK'}
