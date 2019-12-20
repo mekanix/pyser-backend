@@ -1,4 +1,4 @@
 ---
 devel_packages:
-  - name: py36-sqlite3
+  - name: py37-sqlite3
   - name: postgresql11-client

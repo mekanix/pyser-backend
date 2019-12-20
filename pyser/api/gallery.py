@@ -134,6 +134,8 @@ class GalleryAlbumAPI(MethodView):
             file_dir = f'{media_path}/{event.year}/{album.name}'
             if not os.path.exists(file_dir):
                 os.makedirs(file_dir)
-            os.rename(tempfile, finalFile.path(prefix=media_path))
+            finalPath = finalFile.path(prefix=media_path)
+            os.rename(tempfile, finalPath)
+            os.chmod(finalPath, 0o644)
             finalFile.save()
         return formargs
