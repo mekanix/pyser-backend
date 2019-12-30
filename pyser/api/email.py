@@ -3,13 +3,13 @@ from email.mime.text import MIMEText
 from flask import current_app
 from flask_jwt_extended import get_jwt_identity
 from flask_smorest import Blueprint, abort
+from freenit.api.methodviews import ProtectedMethodView
+from freenit.models.user import User
 
-from ..models.auth import User
 from ..models.email import Email
 from ..models.event import Event
 from ..models.talk import Talk
 from ..schemas.email import EmailSchema
-from .methodviews import ProtectedMethodView
 
 blueprint = Blueprint('email', 'email')
 

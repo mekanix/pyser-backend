@@ -1,11 +1,11 @@
 import sys
 
+from freenit.schemas.base import BaseSchema
+from freenit.schemas.paging import PageOutSchema
+from freenit.schemas.user import UserSchema
 from marshmallow import fields
 
 from ..date import datetime_format
-from .auth import UserSchema
-from .base import BaseSchema
-from .paging import PageOutSchema
 
 
 class BlogSchema(BaseSchema):

@@ -1,3 +1,5 @@
+from freenit.db import db
+from freenit.models.user import User
 from peewee import (
     BooleanField,
     DateTimeField,
@@ -7,8 +9,6 @@ from peewee import (
 )
 
 from ..date import datetime_format
-from ..db import db
-from .auth import User
 from .event import Event
 
 Model = db.Model

@@ -1,11 +1,5 @@
 bcrypt
-flask-collect
-flask-cors
-flask-jwt-extended
-flask-smorest
-flask-security
+freenit
 gunicorn
-marshmallow
-peewee-migrate
 psycopg2
 unidecode

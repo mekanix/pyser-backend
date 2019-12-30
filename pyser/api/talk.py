@@ -5,13 +5,13 @@ from flask import current_app
 from flask.views import MethodView
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_smorest import Blueprint, abort
+from freenit.api.methodviews import ProtectedMethodView
+from freenit.models.user import User
+from freenit.schemas.paging import PageInSchema, paginate
 
-from ..models.auth import User
 from ..models.event import Event
 from ..models.talk import Talk
-from ..schemas.paging import PageInSchema, paginate
 from ..schemas.talk import TalkPageOutSchema, TalkSchema
-from .methodviews import ProtectedMethodView
 
 announce_subject = '[PySer] Your talk is {}accepted'
 announce_message = """
