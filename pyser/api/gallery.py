@@ -4,6 +4,7 @@ from tempfile import NamedTemporaryFile
 from flask import current_app
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
+from freenit.schemas.paging import PageInSchema, paginate
 from werkzeug.utils import secure_filename
 
 from ..models.event import Event
@@ -14,7 +15,6 @@ from ..schemas.gallery import (
     GalleryUploadSchema,
     ResumableGalleryUploadSchema
 )
-from ..schemas.paging import PageInSchema, paginate
 
 blueprint = Blueprint('gallery', 'gallery')
 

@@ -1,14 +1,13 @@
 from flask_jwt_extended import get_jwt_identity
 from flask_smorest import Blueprint, abort
+from freenit.models.user import User
+from freenit.api.methodviews import ProtectedMethodView
 
-from ..models.auth import User
 from ..models.cfp import CfP
 from ..models.event import Event
 from ..models.talk import Talk
-#  from ..utils import send_mail
 from ..schemas.cfp import CfPSchema
 from ..schemas.talk import TalkSchema
-from .methodviews import ProtectedMethodView
 
 message_format = """
 Details: {referrer}/{talk.id}

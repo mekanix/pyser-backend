@@ -2,13 +2,13 @@ import sys
 from copy import copy
 from datetime import datetime
 
+from freenit.schemas.base import BaseSchema
+from freenit.schemas.paging import PageOutSchema
+from freenit.schemas.user import UserSchema
 from marshmallow import fields, pre_dump
 
 from ..date import datetime_format, peewee_datetime_format
-from .auth import UserSchema
-from .base import BaseSchema
 from .event import EventSchema
-from .paging import PageOutSchema
 
 
 class TalkSchema(BaseSchema):

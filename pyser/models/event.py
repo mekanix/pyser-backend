@@ -1,6 +1,6 @@
 from peewee import BooleanField, IntegerField
 
-from ..db import db
+from freenit.db import db
 
 Model = db.Model
 

@@ -1,6 +1,6 @@
 from marshmallow import fields
 
-from .base import BaseSchema
+from freenit.schemas.base import BaseSchema
 
 
 class EmailSchema(BaseSchema):

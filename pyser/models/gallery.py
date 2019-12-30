@@ -1,6 +1,6 @@
+from freenit.db import db
 from peewee import ForeignKeyField, TextField
 
-from ..db import db
 from .event import Event
 
 Model = db.Model

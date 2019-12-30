@@ -1,10 +1,10 @@
 import sys
 
 from marshmallow import fields
+from freenit.schemas.base import BaseSchema
+from freenit.schemas.paging import PageOutSchema
 
-from .base import BaseSchema
 from .event import EventSchema
-from .paging import PageOutSchema
 
 
 class HallSchema(BaseSchema):

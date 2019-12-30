@@ -1,7 +1,7 @@
+from freenit.schemas.base import BaseSchema
+from freenit.schemas.user import UserSchema
 from marshmallow import fields
 
-from .auth import UserSchema
-from .base import BaseSchema
 from .talk import TalkSchema
 
 

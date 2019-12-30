@@ -5,11 +5,12 @@ from flask_mail import Message
 from flask_smorest import Blueprint, abort
 from peewee import fn
 
-from ..models.auth import User
+from freenit.schemas.paging import PageInSchema, paginate
+from freenit.models.user import User
+
 from ..models.cfs import CfS
 from ..models.event import Event
 from ..schemas.cfs import CfSPageOutSchema, CfSSchema
-from ..schemas.paging import PageInSchema, paginate
 
 blueprint = Blueprint('cfs', 'cfs')
 

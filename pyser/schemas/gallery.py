@@ -1,11 +1,11 @@
 import sys
 
 from flask_smorest.fields import Upload
+from freenit.schemas.base import BaseSchema
+from freenit.schemas.paging import PageOutSchema
 from marshmallow import fields
 
-from .base import BaseSchema
 from .event import EventSchema
-from .paging import PageOutSchema
 
 
 class GalleryFileSchema(BaseSchema):

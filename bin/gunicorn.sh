@@ -11,6 +11,7 @@ LOG_LEVEL=debug
 
 . ${BIN_DIR}/common.sh
 setup
+pip install -U gunicorn
 
 
 exec gunicorn ${WSGI_MODULE}:app \
