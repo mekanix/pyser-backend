@@ -1,13 +1,21 @@
 import os
 import socket
-from freenit import cli, create_app
+
 from config import configs
+from freenit import create_app
+from name import app_name
 from pyser.api import create_api
 
 config_name = os.getenv('FLASK_ENV') or 'default'
 config = configs[config_name]
-app = create_app(config)
-cli.register(app)
+auth = {
+    'user': f'{app_name}.models.user',
+    'role': f'{app_name}.models.role',
+}
+schemas = {
+    'user': f'{app_name}.schemas.user',
+}
+app = create_app(config, app_name, auth=auth, schemas=schemas)
 create_api(app)
 hostname = socket.gethostname()
 port = os.environ.get('FLASK_PORT', 5000)

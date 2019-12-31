@@ -3,16 +3,16 @@ from datetime import datetime
 from freenit.api.methodviews import MethodView
 from freenit.schemas.paging import PageInSchema, paginate
 from flask_jwt_extended import get_jwt_identity, jwt_optional, jwt_required
-from flask_smorest import Blueprint
+from flask_smorest import Blueprint, abort
 from freenit.models.user import User
 
 from ..models.blog import Blog
 from ..schemas.blog import BlogPageOutSchema, BlogSchema
 
-blueprint = Blueprint('blog', 'blog')
+blueprint = Blueprint('blogs', 'blogs')
 
 
-@blueprint.route('', endpoint='blogs')
+@blueprint.route('', endpoint='list')
 class BlogListAPI(MethodView):
     @jwt_optional
     @blueprint.arguments(PageInSchema(), location='headers')
@@ -37,7 +37,7 @@ class BlogListAPI(MethodView):
         try:
             user = User.get(id=user_id)
         except User.DoesNotExist:
-            return {'message': 'User not found'}, 404
+            abort(404, message='User not found')
         try:
             Blog.find(
                 blog.date.year,
@@ -45,14 +45,14 @@ class BlogListAPI(MethodView):
                 blog.date.day,
                 blog.slug,
             )
-            return {'message': 'Post with the same title already exists'}, 409
+            abort(409, message='Post with the same title already exists')
         except Blog.DoesNotExist:
             blog.author = user
             blog.save()
         return blog
 
 
-@blueprint.route('/<year>/<month>/<day>/<slug>', endpoint='blog')
+@blueprint.route('/<year>/<month>/<day>/<slug>', endpoint='detail')
 class BlogAPI(MethodView):
     @blueprint.response(BlogSchema)
     def get(self, year, month, day, slug):
@@ -60,14 +60,10 @@ class BlogAPI(MethodView):
         try:
             blog = Blog.find(year, month, day, slug)
         except Blog.DoesNotExist:
-            return {'message': 'No such blog'}, 404
+            abort(404, message='No such blog')
         except ValueError:
-            return {'message': 'Multiple blogs found'}, 409
-        schema = BlogSchema()
-        response, errors = schema.dump(blog)
-        if errors:
-            return errors, 409
-        return response
+            abort(409, message='Multiple blogs found')
+        return blog
 
     @jwt_required
     @blueprint.arguments(BlogSchema(partial=True))
@@ -77,9 +73,9 @@ class BlogAPI(MethodView):
         try:
             blog = Blog.find(year, month, day, slug)
         except Blog.DoesNotExist:
-            return {'message': 'No such blog'}, 404
+            abort(404, message='No such blog')
         except ValueError:
-            return {'message': 'Multiple blogs found'}, 409
+            abort(409, message='Multiple blogs found')
         for field in args:
             setattr(blog, field, args[field])
         blog.save()
@@ -92,8 +88,8 @@ class BlogAPI(MethodView):
         try:
             blog = Blog.find(year, month, day, slug)
         except Blog.DoesNotExist:
-            return {'message': 'No such blog'}, 404
+            abort(404, message='No such blog')
         except ValueError:
-            return {'message': 'Multiple blogs found'}, 409
+            abort(409, message='Multiple blogs found')
         blog.delete_instance()
         return blog
