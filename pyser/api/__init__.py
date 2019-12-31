@@ -11,6 +11,7 @@ def create_api(app):
     from .hall import blueprint as hall
     from .landing import blueprint as landing
     from .talk import blueprint as talk
+    from .ticket import blueprint as ticket
 
     register_endpoints(
         app,
@@ -25,5 +26,6 @@ def create_api(app):
             hall,
             landing,
             talk,
+            ticket,
         ],
     )

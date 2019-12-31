@@ -18,8 +18,8 @@ class BlogSchema(BaseSchema):
         dump_only=True,
     )
     published = fields.Boolean(description='Published', default=False)
-    slug = fields.Str(description='Slug', dump_only=True)
-    title = fields.Str(description='Title')
+    slug = fields.String(description='Slug', dump_only=True)
+    title = fields.String(description='Title')
 
 
 PageOutSchema(BlogSchema, sys.modules[__name__])
