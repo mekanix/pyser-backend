@@ -43,10 +43,10 @@ Regards,
 PySer conference
 """
 
-blueprint = Blueprint('talk', 'talk')
+blueprint = Blueprint('talks', 'talks')
 
 
-@blueprint.route('/year/<year_id>', endpoint='talks')
+@blueprint.route('/year/<year_id>', endpoint='list')
 class TalkListAPI(ProtectedMethodView):
     @blueprint.arguments(PageInSchema(), location='headers')
     @blueprint.response(TalkPageOutSchema)
@@ -90,7 +90,7 @@ class TalkListAPI(ProtectedMethodView):
         return talk
 
 
-@blueprint.route('/year/<year_id>/user', endpoint='talks_user')
+@blueprint.route('/year/<year_id>/user', endpoint='user')
 class UserTalkListAPI(ProtectedMethodView):
     @blueprint.arguments(PageInSchema(), location='headers')
     @blueprint.response(TalkPageOutSchema)
@@ -127,7 +127,7 @@ class PublishedTalkListAPI(MethodView):
         return result
 
 
-@blueprint.route('/year/<year_id>/announce', endpoint='talks_announce')
+@blueprint.route('/year/<year_id>/announce', endpoint='announce')
 class AnnounceTalkListAPI(ProtectedMethodView):
     def post(self, year_id):
         """Announce the talks"""
@@ -163,7 +163,7 @@ class AnnounceTalkListAPI(ProtectedMethodView):
         return {'message': 'OK'}
 
 
-@blueprint.route('/<talk_id>', endpoint='talk')
+@blueprint.route('/<talk_id>', endpoint='detail')
 class TalkDetailAPI(MethodView):
     @blueprint.response(TalkSchema)
     def get(self, talk_id):
