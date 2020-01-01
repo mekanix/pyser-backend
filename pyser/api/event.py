@@ -9,10 +9,10 @@ from ..models.gallery import GalleryAlbum
 from ..models.hall import Hall
 from ..schemas.event import EventPageOutSchema, EventSchema
 
-blueprint = Blueprint('event', 'event')
+blueprint = Blueprint('events', 'events')
 
 
-@blueprint.route('', endpoint='events')
+@blueprint.route('', endpoint='list')
 class EventListAPI(MethodView):
     @blueprint.arguments(PageInSchema(), location='headers')
     @blueprint.response(EventPageOutSchema)
@@ -46,7 +46,7 @@ class EventListAPI(MethodView):
         return event
 
 
-@blueprint.route('/<int:year>', endpoint='event')
+@blueprint.route('/<int:year>', endpoint='detail')
 class EventAPI(MethodView):
     @blueprint.response(EventSchema)
     def get(self, year):

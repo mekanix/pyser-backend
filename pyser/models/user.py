@@ -9,3 +9,6 @@ class User(BaseUser):
     lastName = peewee.TextField(null=True)
     twitter = peewee.TextField(null=True)
     volunteer = peewee.BooleanField(null=True)
+
+    class Meta:
+        table_name = 'users'

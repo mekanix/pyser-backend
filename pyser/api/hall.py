@@ -8,10 +8,10 @@ from ..models.event import Event
 from ..models.hall import Hall
 from ..schemas.hall import HallPageOutSchema, HallSchema
 
-blueprint = Blueprint('hall', 'hall')
+blueprint = Blueprint('halls', 'halls')
 
 
-@blueprint.route('/<year>', endpoint='halls')
+@blueprint.route('/<year>', endpoint='list')
 class HallListAPI(MethodView):
     @blueprint.arguments(PageInSchema(), location='headers')
     @blueprint.response(HallPageOutSchema)
@@ -44,7 +44,7 @@ class HallListAPI(MethodView):
         return hall
 
 
-@blueprint.route('/<hall_id>', endpoint='hall')
+@blueprint.route('/<hall_id>', endpoint='detail')
 class HallDetailAPI(MethodView):
     @blueprint.response(HallSchema)
     def get(self, hall_id):
