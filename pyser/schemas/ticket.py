@@ -1,10 +1,12 @@
 import sys
+from copy import copy
+from datetime import datetime
 
 from freenit.schemas.base import BaseSchema
 from freenit.schemas.paging import PageOutSchema
-from marshmallow import fields
+from marshmallow import fields, pre_dump
 
-from ..date import datetime_format
+from ..date import datetime_format, peewee_datetime_format
 from .event import EventSchema
 from .user import UserSchema
 
@@ -20,6 +22,15 @@ class TicketSchema(BaseSchema):
         format=datetime_format,
         dump_only=True,
     )
+
+    @pre_dump
+    def convert_date(self, data, many):
+        date = getattr(data, 'date', None)
+        newdata = copy(data)
+        if isinstance(date, str):
+            print(date, peewee_datetime_format)
+            newdata.date = datetime.strptime(date, peewee_datetime_format)
+        return newdata
 
 
 PageOutSchema(TicketSchema, sys.modules[__name__])
