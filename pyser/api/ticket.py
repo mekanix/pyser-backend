@@ -46,10 +46,14 @@ class TicketListAPI(ProtectedMethodView):
 @blueprint.route('/<int:year>/<identifier>', endpoint='detail')
 class TicketAPI(ProtectedMethodView):
     @blueprint.response(TicketSchema)
-    def get(self, identifier):
+    def get(self, year, identifier):
         """Get ticket details"""
         try:
-            ticket = Ticket.get(identifier=identifier)
+            event = Event.get(year=year)
+        except Event.DoesNotExist:
+            abort(404, message='Event does not exist')
+        try:
+            ticket = Ticket.get(event=event, identifier=identifier)
         except Ticket.DoesNotExist:
             abort(404, message='No such ticket')
         return ticket
@@ -57,10 +61,14 @@ class TicketAPI(ProtectedMethodView):
     @jwt_required
     @blueprint.arguments(TicketSchema(partial=True))
     @blueprint.response(TicketSchema)
-    def patch(self, args, identifier):
+    def patch(self, args, year, identifier):
         """Edit ticket details"""
         try:
-            ticket = Ticket.get(identifier=identifier)
+            event = Event.get(year=year)
+        except Event.DoesNotExist:
+            abort(404, message='Event does not exist')
+        try:
+            ticket = Ticket.get(event=event, identifier=identifier)
         except Ticket.DoesNotExist:
             abort(404, message='No such ticket')
         for field in args:
@@ -70,10 +78,14 @@ class TicketAPI(ProtectedMethodView):
 
     @jwt_required
     @blueprint.response(TicketSchema)
-    def delete(self, identifier):
+    def delete(self, year, identifier):
         """Delete ticket"""
         try:
-            ticket = Ticket.get(identifier=identifier)
+            event = Event.get(year=year)
+        except Event.DoesNotExist:
+            abort(404, message='Event does not exist')
+        try:
+            ticket = Ticket.get(event=event, identifier=identifier)
         except Ticket.DoesNotExist:
             abort(404, message='No such ticket')
         ticket.canceled = True
