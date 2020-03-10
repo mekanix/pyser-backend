@@ -1,26 +1,32 @@
 import os
 from importlib import import_module
 
+from freenit import create_app
+from peewee_migrate import Router
+from peewee_migrate.router import DEFAULT_MIGRATE_DIR
+
 import pytest
 from config import configs
 from name import app_name
-from peewee_migrate import Router
-from peewee_migrate.router import DEFAULT_MIGRATE_DIR
 from pytest_factoryboy import register
 
 from .factories import AdminFactory, RoleFactory, UserFactory
-
-application = import_module(f'{app_name}')
 
 register(UserFactory)
 register(AdminFactory)
 register(RoleFactory)
 
+schemas = {
+    'user': f'{app_name}.schemas.user',
+}
+
 
 @pytest.fixture
 def app():
+    api = import_module(f'{app_name}.api')
     config = configs['testing']
-    flask_app = application.create_app(config)
+    flask_app = create_app(config, schemas=schemas)
+    api.create_api(flask_app)
     router = Router(
         flask_app.db.database,
         migrate_dir=f'{DEFAULT_MIGRATE_DIR}/main',
