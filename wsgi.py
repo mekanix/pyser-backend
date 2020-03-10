@@ -12,8 +12,8 @@ config = configs[config_name]
 schemas = {
     'user': f'{app_name}.schemas.user',
 }
-app = create_app(config, schemas=schemas)
-create_api(app)
+application = create_app(config, schemas=schemas)
+create_api(application)
 hostname = socket.gethostname()
 port = os.environ.get('FLASK_PORT', 5000)
 REDOC_PATH = f'{config.OPENAPI_URL_PREFIX}{config.OPENAPI_REDOC_PATH}'
@@ -24,7 +24,7 @@ SWAGGER_URL = f'http://{hostname}:{port}{SWAGGER_PATH}'
 if __name__ == '__main__':
     print(' * ReDoc URL:', REDOC_URL)
     print(' * Swagger URL:', SWAGGER_URL)
-    app.run(
+    application.run(
         host='0.0.0.0',
         port=port,
         debug=True,
