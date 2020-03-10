@@ -10,6 +10,3 @@ if [ "${OFFLINE}" = "yes" ]; then
 else
   setup
 fi
-
-
-flask admin create

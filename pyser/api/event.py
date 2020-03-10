@@ -1,5 +1,5 @@
 from flask.views import MethodView
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_optional, jwt_required
 from flask_smorest import Blueprint, abort
 from freenit.models.user import User
 from freenit.schemas.paging import PageInSchema, paginate
@@ -14,11 +14,21 @@ blueprint = Blueprint('events', 'events')
 
 @blueprint.route('', endpoint='list')
 class EventListAPI(MethodView):
+    @jwt_optional
     @blueprint.arguments(PageInSchema(), location='headers')
     @blueprint.response(EventPageOutSchema)
     def get(self, pagination):
         """List events"""
+        identity = get_jwt_identity()
         query = Event.select().order_by(Event.year.desc())
+        user = None
+        if identity:
+            try:
+                user = User.get(id=identity)
+            except User.DoesNotExist:
+                abort(404, message='No such user')
+        if not user or not user.admin:
+            query = query.where(Event.published)
         return paginate(query, pagination)
 
     @jwt_required
