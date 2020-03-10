@@ -24,7 +24,7 @@ class EmailAPI(ProtectedMethodView):
         try:
             adminUser = User.get(id=user_id)
         except User.DoesNotExist:
-            return {'message': 'No such user'}, 404
+            abort(404, message='No such user')
         if not adminUser.admin:
             abort(403, message='Only admins can send messages')
         baseQuery = User.select()
@@ -37,7 +37,7 @@ class EmailAPI(ProtectedMethodView):
         elif email.to == 'presenters':
             events = Event.select().order_by(Event.year.desc())
             if events.count() == 0:
-                return {'message': 'At least one event should exist'}, 409
+                abort(409, message='At least one event should exist')
             query = [
                 talk.user for talk in events[0].talks.where(Talk.published)
             ]
@@ -46,15 +46,15 @@ class EmailAPI(ProtectedMethodView):
         else:
             abort(409, message='No such user group')
         if email.fromAddress == 'office':
-            msg['From'] = current_app.config.get('MAIL_ADDRESS', None)
+            msg['From'] = current_app.config.get('FROM_EMAIL', None)
         elif email.fromAddress == 'me':
             msg['From'] = adminUser.email
         else:
             abort(409, message='Invalid "fromAddress" parameter')
         msg['Subject'] = email.subject
-        to = [user.email for user in query]
+        msg['To'] = [user.email for user in query]
         try:
-            current_app.sendmail(to, msg)
+            current_app.sendmail(msg)
         except Exception:
             pass
         return email

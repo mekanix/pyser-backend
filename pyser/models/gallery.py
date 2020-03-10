@@ -16,11 +16,8 @@ class GalleryFile(Model):
     filename = TextField(index=True)
 
     def url(self, prefix=''):
-        year = self.album.event.year
         name = self.album.name
-        return f'{prefix}/{year}/{name}/{self.filename}'
-
-    def path(self, prefix):
+        if self.album.event is None:
+            return f'{prefix}/{name}/{self.filename}'
         year = self.album.event.year
-        name = self.album.name
         return f'{prefix}/{year}/{name}/{self.filename}'

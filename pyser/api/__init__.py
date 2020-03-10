@@ -29,3 +29,6 @@ def create_api(app):
             ticket,
         ],
     )
+
+    from ..cli import register
+    register(app)

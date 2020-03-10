@@ -3,7 +3,8 @@ from marshmallow import fields
 
 
 class UserSchema(BaseUserSchema):
-    bio = fields.String()
+    avatar = fields.String(dump_only=True)
+    biography = fields.String()
     facebook = fields.String()
     firstName = fields.String()
     lastName = fields.String()

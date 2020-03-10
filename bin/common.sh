@@ -24,4 +24,6 @@ setup() {
     pip install -U -r requirements.txt
   fi
   flask migration run
+  flask admin create
+  flask gallery create
 }

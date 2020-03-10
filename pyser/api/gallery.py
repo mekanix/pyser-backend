@@ -1,14 +1,16 @@
 import os
-from tempfile import NamedTemporaryFile
+import shutil
 
 from flask import current_app
 from flask.views import MethodView
+from flask_jwt_extended import get_jwt_identity, jwt_optional
 from flask_smorest import Blueprint, abort
 from freenit.schemas.paging import PageInSchema, paginate
 from werkzeug.utils import secure_filename
 
 from ..models.event import Event
 from ..models.gallery import GalleryAlbum, GalleryFile
+from ..models.user import User
 from ..schemas.gallery import (
     GalleryAlbumPageOutSchema,
     GalleryAlbumSchema,
@@ -17,8 +19,6 @@ from ..schemas.gallery import (
 )
 
 blueprint = Blueprint('gallery', 'gallery')
-
-chunks = {}
 
 
 @blueprint.route('', endpoint='albums')
@@ -29,10 +29,7 @@ class GalleryAlbumListAPI(MethodView):
     def get(self, pagination, year=None):
         """Get list of albums"""
         if year is None:
-            return paginate(
-                GalleryAlbum.select().where(GalleryAlbum.event),
-                pagination,
-            )
+            return paginate(GalleryAlbum.select(), pagination)
         try:
             event = Event.get(year=year)
         except Event.DoesNotExist:
@@ -68,6 +65,7 @@ class GalleryAlbumAPI(MethodView):
         album.prefix = prefix
         return album
 
+    @jwt_optional
     @blueprint.arguments(GalleryUploadSchema, location='files')
     @blueprint.arguments(ResumableGalleryUploadSchema, location='form')
     @blueprint.response(ResumableGalleryUploadSchema)
@@ -84,58 +82,62 @@ class GalleryAlbumAPI(MethodView):
             album = GalleryAlbum.get(name=name, event=event)
         except GalleryAlbum.DoesNotExist:
             abort(404, message='No such album')
-        album.prefix = current_app.config.get('MEDIA_URL', None)
-        if album.prefix is None:
+        user_id = get_jwt_identity()
+        if user_id is None:
+            abort(401, message='Must be logged in to upload!')
+        try:
+            user = User.get(id=user_id)
+        except User.DoesNotExist:
+            abort(404, message='No such user')
+        if not user.admin and album.name != 'avatars':
+            abort(403, message='Only avatar uploads are allowed!')
+        prefix = current_app.config.get('MEDIA_URL', None)
+        if prefix is None:
             abort(409, message='Backend misconfiguration, no MEDIAL_URL')
         uploadFile = fileargs['file']
         chunkNumber = formargs['resumableChunkNumber']
+        chunkSize = formargs['resumableChunkSize']
+        total = formargs['resumableTotalChunks']
         identifier = formargs['resumableIdentifier']
-        fileEntry = chunks.get(identifier, None)
         media_path = os.path.abspath(
             current_app.config.get(
                 'MEDIA_PATH',
                 None,
-            )
+            ),
         )
-        if fileEntry is None:
-            tempfile = NamedTemporaryFile(
-                dir=f'{media_path}/tmp',
-                delete=False
-            )
-            tempfile.close()
-            fileEntry = {
-                'chunkSize': formargs['resumableChunkSize'],
-                'filename': formargs['resumableFilename'],
-                'identifier': identifier,
-                'temp': tempfile.name,
-                'total': formargs['resumableTotalChunks'],
-                'type': formargs['resumableType'],
-            }
-            chunks[identifier] = fileEntry
-            uploadFile.save(fileEntry['temp'])
-        else:
-            with open(fileEntry['temp'], 'ab') as tempfile:
-                offset = (chunkNumber - 1) * fileEntry['chunkSize']
-                tempfile.seek(offset)
-                tempfile.write(uploadFile.read())
-
-        if chunkNumber == fileEntry['total']:
-            tempfile = fileEntry['temp']
+        filePath = f'/tmp/{identifier}'
+        with open(filePath, 'ab') as tempfile:
+            offset = (chunkNumber - 1) * chunkSize
+            tempfile.seek(offset)
+            tempfile.write(uploadFile.read())
+        if chunkNumber == total:
+            if album.name == 'avatars':
+                category = formargs['resumableType'][:5]
+                if category != 'image':
+                    abort(409, message='Only image type allowed')
+                imgtype = formargs['resumableType'][6:]
+                filename = f'{user.id}.{imgtype}'
+            else:
+                filename = secure_filename(uploadFile.filename)
             try:
-                finalFile = GalleryFile.get(
-                    album=album,
-                    filename=secure_filename(uploadFile.filename),
-                )
+                finalFile = GalleryFile.get(album=album, filename=filename)
             except GalleryFile.DoesNotExist:
                 finalFile = GalleryFile(
                     album=album,
-                    filename=secure_filename(uploadFile.filename),
+                    filename=secure_filename(filename),
                 )
-            file_dir = f'{media_path}/{event.year}/{album.name}'
+            formargs['resumableFilename'] = finalFile.filename
+            if event is None:
+                file_dir = f'{media_path}/{album.name}'
+            else:
+                file_dir = f'{media_path}/{event.year}/{album.name}'
             if not os.path.exists(file_dir):
                 os.makedirs(file_dir)
-            finalPath = finalFile.path(prefix=media_path)
-            os.rename(tempfile, finalPath)
+            finalPath = finalFile.url(prefix=media_path)
+            shutil.move(filePath, finalPath)
             os.chmod(finalPath, 0o644)
             finalFile.save()
+            if album.name == 'avatars':
+                user.avatar = finalFile.url(prefix=prefix)
+                user.save()
         return formargs
