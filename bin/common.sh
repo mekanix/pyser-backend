@@ -8,22 +8,23 @@ export PROJECT_ROOT="${BIN_DIR}/.."
 export VIRTUALENV=${VIRTUALENV:="${app_name}back"}
 export FLASK_ENV=${FLASK_ENV:="production"}
 export PY_VERSION=${PY_VERSION:="3.7"}
+export SYSPKG=${SYSPKG:="no"}
 
 
 setup() {
-  update=${1}
-  if [ ! -d ${HOME}/.virtualenvs/${VIRTUALENV} ]; then
-      python${PY_VERSION} -m venv "${HOME}/.virtualenvs/${VIRTUALENV}"
-  fi
-  . ${HOME}/.virtualenvs/${VIRTUALENV}/bin/activate
+  cd "${PROJECT_ROOT}"
+  if [ "${SYSPKG}" = "no" ]; then
+    update=${1}
+    if [ ! -d ${HOME}/.virtualenvs/${VIRTUALENV} ]; then
+        python${PY_VERSION} -m venv "${HOME}/.virtualenvs/${VIRTUALENV}"
+    fi
+    . ${HOME}/.virtualenvs/${VIRTUALENV}/bin/activate
 
-  cd ${PROJECT_ROOT}
-  if [ "${update}" != "no" ]; then
-    pip install -U pip
-    pip install -U wheel
-    pip install -U -r requirements.txt
+    cd ${PROJECT_ROOT}
+    if [ "${update}" != "no" ]; then
+      pip install -U pip
+      pip install -U wheel
+      pip install -U -r requirements.txt
+    fi
   fi
-  flask migration run
-  flask admin create
-  flask gallery create
 }
