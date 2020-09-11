@@ -1,3 +1,5 @@
+USE_FREENIT = YES
+SYSPKG = YES
 CBSD_WORKDIR != sysrc -n cbsd_workdir
 SERVICE = pyser
 REGGAE_PATH :=/usr/local/share/reggae

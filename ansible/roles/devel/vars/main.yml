@@ -1,4 +1,7 @@
 ---
 devel_packages:
+  - name: postgresql12-client
+  - name: py37-freenit
+  - name: py37-ipdb
   - name: py37-sqlite3
-  - name: postgresql11-client
+  - name: py37-unidecode
