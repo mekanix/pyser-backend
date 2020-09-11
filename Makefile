@@ -1,5 +1,5 @@
 CBSD_WORKDIR != sysrc -n cbsd_workdir
-SERVICE = pyserback
+SERVICE = pyser
 REGGAE_PATH :=/usr/local/share/reggae
 
 shell: up

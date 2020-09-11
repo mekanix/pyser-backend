@@ -2,7 +2,7 @@ import datetime
 import re
 
 from freenit.db import db
-from freenit.models.user import User
+from freenit.models.sql.user import User
 from unidecode import unidecode
 
 from peewee import BooleanField, DateTimeField, ForeignKeyField, TextField

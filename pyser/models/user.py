@@ -1,5 +1,5 @@
 import peewee
-from freenit.models.user import User as BaseUser
+from freenit.models.sql.user import User as BaseUser
 
 
 class User(BaseUser):

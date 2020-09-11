@@ -1,7 +1,7 @@
-from flask_jwt_extended import get_jwt_identity, jwt_optional, jwt_required
+from flask_jwt_extended import get_jwt_identity
 from flask_smorest import Blueprint, abort
 from freenit.api.methodviews import ProtectedMethodView
-from freenit.models.user import User
+from freenit.models.sql.user import User
 from freenit.schemas.paging import PageInSchema, paginate
 
 from ..models.event import Event
@@ -13,7 +13,6 @@ blueprint = Blueprint('tickets', 'tickets')
 
 @blueprint.route('/<int:year>', endpoint='list')
 class TicketListAPI(ProtectedMethodView):
-    @jwt_optional
     @blueprint.arguments(PageInSchema(), location='headers')
     @blueprint.response(TicketPageOutSchema)
     def get(self, pagination, year):
@@ -24,7 +23,6 @@ class TicketListAPI(ProtectedMethodView):
             abort(404, message='Event does not exist')
         return paginate(event.tickets, pagination)
 
-    @jwt_required
     @blueprint.arguments(TicketSchema(exclude=['canceled']))
     @blueprint.response(TicketSchema)
     def post(self, args, year):
@@ -58,7 +56,21 @@ class TicketAPI(ProtectedMethodView):
             abort(404, message='No such ticket')
         return ticket
 
-    @jwt_required
+    @blueprint.arguments(TicketSchema(partial=True))
+    @blueprint.response(TicketSchema)
+    def post(self, args, year, identifier):
+        """Mark ticket as used"""
+        try:
+            event = Event.get(year=year)
+        except Event.DoesNotExist:
+            abort(404, message='Event does not exist')
+        try:
+            ticket = Ticket.get(event=event, identifier=identifier)
+        except Ticket.DoesNotExist:
+            abort(404, message='No such ticket')
+        ticket.save()
+        return ticket
+
     @blueprint.arguments(TicketSchema(partial=True))
     @blueprint.response(TicketSchema)
     def patch(self, args, year, identifier):
@@ -76,7 +88,6 @@ class TicketAPI(ProtectedMethodView):
         ticket.save()
         return ticket
 
-    @jwt_required
     @blueprint.response(TicketSchema)
     def delete(self, year, identifier):
         """Delete ticket"""
