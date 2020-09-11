@@ -1,5 +1,5 @@
 from freenit.db import db
-from freenit.models.user import User
+from freenit.models.sql.user import User
 from peewee import (
     BooleanField,
     DateTimeField,

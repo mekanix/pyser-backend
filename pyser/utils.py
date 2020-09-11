@@ -17,5 +17,5 @@ def sendmail(config, to, message):
         server.sendmail(
             message['From'],
             to,
-            message.as_string().encode('utf-8')
+            message.as_string().encode('utf-8'),
         )

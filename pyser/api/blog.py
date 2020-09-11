@@ -4,7 +4,7 @@ from freenit.api.methodviews import MethodView
 from freenit.schemas.paging import PageInSchema, paginate
 from flask_jwt_extended import get_jwt_identity, jwt_optional, jwt_required
 from flask_smorest import Blueprint, abort
-from freenit.models.user import User
+from freenit.models.sql.user import User
 
 from ..models.blog import Blog
 from ..schemas.blog import BlogPageOutSchema, BlogSchema

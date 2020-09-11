@@ -1,5 +1,5 @@
 bcrypt
-freenit
+freenit[sql]
 gunicorn
 psycopg2
 unidecode
