@@ -7,7 +7,7 @@ ansible/inventory/inventory
 ansible/roles/*
 ansible/site.yml
 !ansible/roles/.keep
-!ansible/roles/devel
+!ansible/roles/pyser
 build
 cbsd.conf
 coverage.xml

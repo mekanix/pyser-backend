@@ -1,0 +1,7 @@
+---
+- name: install pyser packages
+  with_items: "{{ pyser_packages }}"
+  pkgng:
+    name: "{{ item.name }}"
+  notify:
+    - restart uwsgi
