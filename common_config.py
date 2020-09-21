@@ -9,10 +9,11 @@ SECRET_KEY = 'iQfPvB6sZaNHqVFI5CJa9rM1xOEVHKIM0LwifT04yLsPlZhSSvaDuZXOgJFSpJVq'
 
 class Config:
     NAME = app_name
-    API_TITLE = 'PySer'
-    API_VERSION = '0'
+    API_TITLE = app_name
+    API_VERSION = 0
     PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
     DEBUG = False
+    USE_AUTH = True
     SECURITY_PASSWORD_SALT = 'tilda'
     SECRET_KEY = SECRET_KEY
     SECURITY_TRACKABLE = False
@@ -31,6 +32,9 @@ class Config:
     OPENAPI_VERSION = '2.0.0'
     MEDIA_URL = '/media'
     MEDIA_PATH = 'media'
+    ACCOUNT_REQUEST_EXPIRY = 24  # in hours
+    PASSWORD_RESET_EXPIRY = 2  # in hours
+    COLLECT_STATIC_ROOT = os.path.dirname(__file__) + '/static'
     DATABASE = {
         'name': 'database.db',
         'engine': 'SqliteDatabase',

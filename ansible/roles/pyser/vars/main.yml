@@ -1,0 +1,3 @@
+---
+pyser_packages:
+  - name: "{{ python_prefix }}-unidecode"

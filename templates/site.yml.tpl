@@ -6,4 +6,6 @@
   hosts: SERVICE
   roles:
     - onelove-roles.freebsd-common
-    - devel
+    - onelove-roles.freebsd_freenit
+    - onelove-roles.freebsd_sql
+    - pyser
